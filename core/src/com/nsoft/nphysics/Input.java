@@ -31,7 +31,8 @@ public class Input implements InputProcessor {
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		// TODO Auto-generated method stub
-		return false;
+		NPhysics.scene.proccessClick(screenX, screenY);
+		return true;
 	}
 
 	@Override
@@ -49,7 +50,9 @@ public class Input implements InputProcessor {
 	@Override
 	public boolean scrolled(int amount) {
 		// TODO Auto-generated method stub
-		return false;
+		NPhysics.scene.zoom(amount);
+		System.out.println(amount);
+		return true;
 	}
 
 	
