@@ -21,6 +21,8 @@ public class Scene extends Stage {
 
 	private final Vector3 Pos = new Vector3();
 	private final Vector3 Pos1 = new Vector3();
+	
+	public static Polygon p = new Polygon();
 	static {
 		
 		processMove = new Thread(()->{
@@ -41,7 +43,7 @@ public class Scene extends Stage {
 	public Scene() {
 		super();
 		shape_renderer.setColor(.8f, .8f, .8f, 1);
-		//processMove.start();
+		processMove.start();
 		
 	}
 	
@@ -60,6 +62,10 @@ public class Scene extends Stage {
 		
 		int y = (int) (getCamera().position.y - getHeight()/2);
 		int x = (int) (getCamera().position.x - getWidth()/2);
+		
+		//float zoom = ((OrthographicCamera)getCamera()).zoom;
+		
+		
 		for (int i = y/gridSize; i < (getHeight()/gridSize) + y/gridSize + 1; i++) {
 			
 			shape_renderer.line(-(Math.abs(x)), i*gridSize, getWidth() + x, i*gridSize);
@@ -70,6 +76,8 @@ public class Scene extends Stage {
 			
 			shape_renderer.line(i*gridSize,-(Math.abs(y)), i*gridSize, getHeight()+ y);
 		}
+		
+		
 		
 		if(current) {
 			
@@ -92,6 +100,16 @@ public class Scene extends Stage {
 			shape_renderer.setColor(.8f, .8f, .8f, 1);
 		}
 		shape_renderer.end();
+		
+		if(p.isEnded()) {
+			
+			shape_renderer.begin(ShapeType.Filled);
+			shape_renderer.setColor(0.3f, 0.8f, 0.3f, 0.8f);
+			shape_renderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
+			shape_renderer.end();
+			shape_renderer.setColor(.8f, .8f, .8f, 1);
+		}
+		
 		
 	}
 
@@ -122,7 +140,12 @@ public class Scene extends Stage {
 		if(!(x1 == x2 && y1 == y2)) {
 			
 			Line a = new Line(x1, y1, x2, y2);
-			if(!Line.exists(a))Line.lines.add(a);
+			if(!Line.exists(a)) {
+				Line.lines.add(a);
+				if(p.isEmpty()) p.addVertex(x2, y2);
+				p.addVertex(x2, y2);
+				
+			}
 			else System.err.println("Same line");
 		}
 	}

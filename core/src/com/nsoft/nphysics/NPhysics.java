@@ -14,6 +14,8 @@ public class NPhysics extends ApplicationAdapter {
 	static Scene scene;
 	static UIScene ui;
 	static IsInWindow mouse;
+	static NPhysics n;
+	
 	public NPhysics(IsInWindow mouse) {
 		
 		this.mouse = mouse;
@@ -21,10 +23,13 @@ public class NPhysics extends ApplicationAdapter {
 	@Override
 	public void create () {
 		
+		n= this;
+		
 		scene = new Scene();
 		scene.setViewport(new ScreenViewport(scene.getCamera()));
 		ui = new UIScene();
-		Gdx.input.setInputProcessor(new InputMultiplexer(new Input(),ui));
+		Gdx.input.setInputProcessor(new Input());
+		
 	}
 
 	@Override
