@@ -19,6 +19,7 @@ public class Scene extends Stage {
 	private static Thread processMove;
 	
 	private boolean drawGrid = true;
+	private boolean drawLines = true;
 	
 	public static ArrayList<Polygon> polygons = new ArrayList<>();
 	
@@ -48,46 +49,33 @@ public class Scene extends Stage {
 		super();
 		shape_renderer.setColor(.8f, .8f, .8f, 1);
 	
-		Polygon.setProjectionMatrix(getCamera().combined);
 		init();
 	}
 	
 	public void init() {
 		
-		processMove.start();
+		//processMove.start();
 		
 	}
 	@Override
 	public void draw() {
 		
 		if(drawGrid)drawGrid();
+		if(drawLines)drawLines();
+		drawPolys();
 		super.draw();
 	}
-	
-	private void drawGrid() {
-
-
-		shape_renderer.setProjectionMatrix(getCamera().combined);
-		shape_renderer.begin(ShapeType.Line);
+	private void drawPolys() {
 		
-		int y = (int) (getCamera().position.y - getHeight()/2);
-		int x = (int) (getCamera().position.x - getWidth()/2);
-		
-		//float zoom = ((OrthographicCamera)getCamera()).zoom;
-		
-		
-		for (int i = y/gridSize; i < (getHeight()/gridSize) + y/gridSize + 1; i++) {
+		shape_renderer.begin(ShapeType.Filled);
+		shape_renderer.setColor(0.3f, 0.8f, 0.3f, 0.6f);
+		for (Polygon polygon : polygons) {
 			
-			shape_renderer.line(-(Math.abs(x)), i*gridSize, getWidth() + x, i*gridSize);
-			
+			polygon.draw(shape_renderer);
 		}
-		
-		for (int i = x/gridSize; i < (getWidth()/gridSize) + x/gridSize + 1; i++) {
-			
-			shape_renderer.line(i*gridSize,-(Math.abs(y)), i*gridSize, getHeight()+ y);
-		}
-		
-		
+		shape_renderer.end();
+	}
+	private void drawLines() {
 		
 		if(current) {
 			
@@ -110,6 +98,32 @@ public class Scene extends Stage {
 			shape_renderer.setColor(.8f, .8f, .8f, 1);
 		}
 		shape_renderer.end();
+		
+	}
+	private void drawGrid() {
+
+
+		shape_renderer.setProjectionMatrix(getCamera().combined);
+		shape_renderer.begin(ShapeType.Line);
+
+		shape_renderer.setColor(.8f, .8f, .8f, 1);
+		int y = (int) (getCamera().position.y - getHeight()/2);
+		int x = (int) (getCamera().position.x - getWidth()/2);
+		
+		//float zoom = ((OrthographicCamera)getCamera()).zoom;
+		
+		
+		for (int i = y/gridSize; i < (getHeight()/gridSize) + y/gridSize + 1; i++) {
+			
+			shape_renderer.line(-(Math.abs(x)), i*gridSize, getWidth() + x, i*gridSize);
+			
+		}
+		
+		for (int i = x/gridSize; i < (getWidth()/gridSize) + x/gridSize + 1; i++) {
+			
+			shape_renderer.line(i*gridSize,-(Math.abs(y)), i*gridSize, getHeight()+ y);
+		}
+		
 		
 		
 		
@@ -148,8 +162,8 @@ public class Scene extends Stage {
 				Line.lines.add(a);
 				Polygon p = polygons.get(polygons.size() -1);
 				
-				if(p.isEmpty()) p.addVertex(x1, y1);
-				else if(p.vertices.get(0).x == x2 && p.vertices.get(0).y == y2) {
+				if(p.isEmpty()) { p.addVertex(x1, y1); p.addVertex(x2, y2);}
+				else if(p.Vertexs.get(0) == x2 && p.Vertexs.get(1) == y2) {
 					
 					p.end();
 					current = false;

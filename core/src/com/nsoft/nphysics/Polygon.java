@@ -25,67 +25,62 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import earcut4j.Earcut;
 
 public class Polygon{
-
-	static Texture textureSolid;
-	static PolygonSpriteBatch batch;
-	public boolean isReady = false;
-	List<Integer> indexes;
-	public float[] vertexs;
-	ArrayList<Vector2> vertices = new ArrayList<>();
-	PolygonSprite sprite;
-	Path2D path;
 	
-	public static void setProjectionMatrix(Matrix4 m) {
-		
-
-		batch = new PolygonSpriteBatch();
-		//batch.setTransformMatrix(m);
-		
-		Pixmap p = new Pixmap(10, 10, Pixmap.Format.RGBA8888);
-		p.setColor(0.3f, 0.8f, 0.3f, 0.8f);
-		p.fillRectangle(0, 0, 10, 10);
-		textureSolid = new Texture(p);
-		p.dispose();
-		
-	}
+	
+	boolean isReady = false;
+	float[] vertexs;
+	List<Integer> indexes;
+	public ArrayList<Float> Vertexs = new ArrayList<>();
 	public Polygon() {
 		
-		path = new Path2D.Double();
 	}
 	
 	public void addVertex(float x,float y) {
 		
 		if(!isReady) {
 
-			if(!isEmpty())path.lineTo(x, y);
-			else { path.moveTo(x, y); System.err.println("dawdawdwad");}
-
-			vertices.add(new Vector2(x, y));
+			Vertexs.add(x);
+			Vertexs.add(y);
 		}
 	}
 	
 	public float[] getVertices() {
 		
+		if(!isReady) throw new IllegalStateException();
 		if(vertexs != null) return vertexs;
-		vertexs = new float[vertices.size()*2];
+		vertexs = new float[Vertexs.size()];
 		
 		for (int i = 0; i < vertexs.length; i++) {
 			
-			int index = i/2;
-			if(i % 2 == 0 ) vertexs[i] = vertices.get(index).x;
-			else vertexs[i] = vertices.get(index).y;
+			vertexs[i] = Vertexs.get(i);
 		}
 		
 		return getVertices();
 	}
 	
+	public float getX(int vertex) {
+		
+		if(vertex > getVertices().length/2 - 1) return Float.MIN_VALUE;
+		else {
+			
+			return getVertices()[vertex*2];
+		}
+	}
+	
+	public float getY(int vertex) {
+		
+		if(vertex > getVertices().length/2 - 1) return Float.MIN_VALUE;
+		else {
+			
+			return getVertices()[vertex*2 + 1];
+		}
+	}
 	public boolean isEnded() {return isReady;}
 	public void end() {
 		
-		path.closePath(); 
 		isReady = true;
-		sprite = new PolygonSprite(new PolygonRegion(new TextureRegion(textureSolid), getVertices(), new short[10]));
 		generateTraingles();
+		System.out.println("End");
 	}
 	
 	private void generateTraingles() {
@@ -102,25 +97,24 @@ public class Polygon{
 	void draw(ShapeRenderer rend) {
 		
 		if(isReady) {
-			
+
 			for (int i = 0; i < indexes.size(); i+=3) {
 				
 				try {
 					
-
-					rend.triangle(vertexs[indexes.get(i)], vertexs[indexes.get(i) + 1], 
-							vertexs[indexes.get(i + 1)], vertexs[indexes.get(i + 1) + 1],
-							vertexs[indexes.get(i + 2)], vertexs[indexes.get(i + 2) + 1]);
+					rend.triangle(getX(indexes.get(i)), getY(indexes.get(i)), 
+							getX(indexes.get(i + 1)), getY(indexes.get(i + 1)),
+							getX(indexes.get(i + 2)), getY(indexes.get(i + 2)));
 					
 				} catch (Exception e) {
-					// TODO: handle exception
+					
+					e.printStackTrace();
 				}
 			}
 		}
 	}
 	
-	public boolean isEmpty() {return vertices.size() == 0;}
+	public boolean isEmpty() {return Vertexs.isEmpty();}
 	
-	public Rectangle getBounds() {return path.getBounds();}
 	
 }

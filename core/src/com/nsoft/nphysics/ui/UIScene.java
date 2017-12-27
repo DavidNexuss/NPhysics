@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.Sizes;
 import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.VisUI.SkinScale;
 import com.kotcrab.vis.ui.widget.Menu;
 import com.kotcrab.vis.ui.widget.MenuBar;
 import com.kotcrab.vis.ui.widget.MenuItem;
@@ -40,7 +41,7 @@ public class UIScene extends Stage{
 		skin = new Skin(Gdx.files.internal("skin-files/skin/neutralizer-ui.json"));
 		createMode = new TextButton("Crear Objeto",skin);
 		
-		VisUI.load(skin);
+		VisUI.load(SkinScale.X2);
 
 		Table main = new Table(skin);
 		Menu crear = new Menu("Crear Objeto");

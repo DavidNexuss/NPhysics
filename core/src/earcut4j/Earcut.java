@@ -17,7 +17,7 @@ public final class Earcut {
      */
     public static List<Integer> earcut(double[] data) {
         return earcut(data, null, 2);
-    }
+    }	
     
     /**
      * Triangulates the given polygon
