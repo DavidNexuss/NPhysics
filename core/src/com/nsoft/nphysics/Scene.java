@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.nsoft.nphysics.GameState.GameCode;
 
 public class Scene extends Stage {
 
@@ -17,12 +18,14 @@ public class Scene extends Stage {
 	public int gridSize = 30;
 	private static Thread processMove;
 	
-	private boolean current = false;
+	private boolean drawGrid = true;
+	
+	public static ArrayList<Polygon> polygons = new ArrayList<>();
+	
 
+	private boolean current = false;
 	private final Vector3 Pos = new Vector3();
 	private final Vector3 Pos1 = new Vector3();
-	
-	public static Polygon p = new Polygon();
 	static {
 		
 		processMove = new Thread(()->{
@@ -31,8 +34,9 @@ public class Scene extends Stage {
 				
 				while(true) {
 					
-					if(NPhysics.mouse.isMouseInWindow())NPhysics.scene.processMove(Gdx.input.getX(), Gdx.input.getY());
 					Thread.sleep(10);
+					if(NPhysics.mouse.isMouseInWindow())NPhysics.scene.processMove(Gdx.input.getX(), Gdx.input.getY());
+					
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -43,14 +47,20 @@ public class Scene extends Stage {
 	public Scene() {
 		super();
 		shape_renderer.setColor(.8f, .8f, .8f, 1);
+	
+		Polygon.setProjectionMatrix(getCamera().combined);
+		init();
+	}
+	
+	public void init() {
+		
 		processMove.start();
 		
 	}
-	
 	@Override
 	public void draw() {
 		
-		drawGrid();
+		if(drawGrid)drawGrid();
 		super.draw();
 	}
 	
@@ -101,14 +111,6 @@ public class Scene extends Stage {
 		}
 		shape_renderer.end();
 		
-		if(p.isEnded()) {
-			
-			shape_renderer.begin(ShapeType.Filled);
-			shape_renderer.setColor(0.3f, 0.8f, 0.3f, 0.8f);
-			shape_renderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
-			shape_renderer.end();
-			shape_renderer.setColor(.8f, .8f, .8f, 1);
-		}
 		
 		
 	}
@@ -125,6 +127,7 @@ public class Scene extends Stage {
 			getCamera().translate(0,(float) -Math.sqrt((screenY - getHeight()*9/10)), 0);
 		
 		getCamera().update();
+		
 	}
 	
 	public void zoom(int zoom) {
@@ -141,9 +144,19 @@ public class Scene extends Stage {
 			
 			Line a = new Line(x1, y1, x2, y2);
 			if(!Line.exists(a)) {
+				
 				Line.lines.add(a);
-				if(p.isEmpty()) p.addVertex(x2, y2);
-				p.addVertex(x2, y2);
+				Polygon p = polygons.get(polygons.size() -1);
+				
+				if(p.isEmpty()) p.addVertex(x1, y1);
+				else if(p.vertices.get(0).x == x2 && p.vertices.get(0).y == y2) {
+					
+					p.end();
+					current = false;
+				}else {
+					
+					p.addVertex(x2, y2);
+				}
 				
 			}
 			else System.err.println("Same line");
@@ -151,35 +164,43 @@ public class Scene extends Stage {
 	}
 	public void proccessClick(int x, int y) {
 		
-		if (current) {
+		if(GameState.current == GameCode.CREATE_SOLID) {
 			
-			Vector3 v = new Vector3(x, y, 0);
-			v = getCamera().unproject(v);
-			int ycur = (int) v.y;
-			int xcur = (int) v.x;
-			
-			xcur = xcur % gridSize > gridSize/2 ? xcur + (gridSize - (xcur % gridSize) ): xcur - (xcur % gridSize);
-			ycur = ycur % gridSize > gridSize/2 ? ycur + (gridSize - (ycur % gridSize) ): ycur - (ycur % gridSize);
-			
-			newLine(Pos1.x,Pos1.y, xcur, ycur);
-			current = false;
-		}else {
-			
-			Pos1.set(x, y, 0);
-			Pos1.set(getCamera().unproject(Pos1));
+			if(!current) {
+				
+				Pos1.set(x, y, 0);
+				Pos1.set(getCamera().unproject(Pos1));
 
-			int ycur = (int) Pos1.y;
-			int xcur = (int) Pos1.x;
-			
+				int ycur = (int) Pos1.y;
+				int xcur = (int) Pos1.x;
+				
 
-			System.out.println(xcur % gridSize);
-			
-			xcur = xcur % gridSize > gridSize/2 ? xcur + (gridSize - (xcur % gridSize) ): xcur - (xcur % gridSize);
-			ycur = ycur % gridSize > gridSize/2 ? ycur + (gridSize - (ycur % gridSize) ): ycur - (ycur % gridSize);
-			
-			Pos1.set(xcur, ycur, 0);
-			
-			current = true;
+				System.out.println(xcur % gridSize);
+				
+				xcur = xcur % gridSize > gridSize/2 ? xcur + (gridSize - (xcur % gridSize) ): xcur - (xcur % gridSize);
+				ycur = ycur % gridSize > gridSize/2 ? ycur + (gridSize - (ycur % gridSize) ): ycur - (ycur % gridSize);
+				
+				Pos1.set(xcur, ycur, 0);
+				
+				current = true;
+				polygons.add(new Polygon());
+			}else {
+				
+				Vector3 v = new Vector3(x, y, 0);
+				v = getCamera().unproject(v);
+				int ycur = (int) v.y;
+				int xcur = (int) v.x;
+				
+				xcur = xcur % gridSize > gridSize/2 ? xcur + (gridSize - (xcur % gridSize) ): xcur - (xcur % gridSize);
+				ycur = ycur % gridSize > gridSize/2 ? ycur + (gridSize - (ycur % gridSize) ): ycur - (ycur % gridSize);
+					
+				if(!(xcur == Pos1.x&& ycur == Pos1.y)) {
+					newLine(Pos1.x,Pos1.y, xcur, ycur);
+					Pos1.x = xcur;
+					Pos1.y = ycur;
+				}
+			}
 		}
+		
 	}
 }

@@ -1,7 +1,7 @@
 package com.nsoft.nphysics.ui;
 
 import com.badlogic.gdx.Gdx;
-
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.scenes.scene2d.Action;
@@ -24,6 +24,8 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.Menu;
 import com.kotcrab.vis.ui.widget.MenuBar;
 import com.kotcrab.vis.ui.widget.MenuItem;
+import com.nsoft.nphysics.GameState;
+import com.nsoft.nphysics.GameState.GameCode;
 
 public class UIScene extends Stage{
 
@@ -31,6 +33,7 @@ public class UIScene extends Stage{
 	TextButton createMode;
 	TextButton moveMode;
 	Window helpWindow;
+	Label currentOperation;
 	
 	public UIScene() {
 		
@@ -43,7 +46,15 @@ public class UIScene extends Stage{
 		Menu crear = new Menu("Crear Objeto");
 
 		MenuItem solid = new MenuItem("Crear Solido");
-		
+			solid.addListener(new ClickListener() {
+				
+				@Override
+				public void clicked(InputEvent event, float x, float y) {
+					
+					GameState.setGameState(GameCode.CREATE_SOLID);
+					super.clicked(event, x, y);
+				}
+			});
 		MenuItem barra= new MenuItem("Crear Barra");
 		
 		crear.addItem(solid);
@@ -83,10 +94,15 @@ public class UIScene extends Stage{
 		
 		Table bar = new Table(skin);
 		bar.add(options).fillX().expand();
+		currentOperation = new Label(GameState.getCurrentStateInfo(), skin);
+		currentOperation.setColor(Color.BLACK);
+		currentOperation.setFontScale(1.5f);
 		bar.setSize(getWidth(), 70);
 		
-		main.add(bar).align(Align.top).fillX().expand();
+		main.add(bar).align(Align.top).fillX().expand().row();
 		main.setFillParent(true);
+		
+		main.add(currentOperation).align(Align.bottomLeft).pad(10);
 		addActor(main);
 		
 		
@@ -94,7 +110,7 @@ public class UIScene extends Stage{
 		
 		main.debug();
 		showWindow(helpWindow);
-		getRoot().debug();
+		//getRoot().debug();
 	}
 	
 	public void createDefaultWindowStructure(Window w) {
@@ -109,7 +125,7 @@ public class UIScene extends Stage{
 			super.clicked(event, x, y);
 			hideWindow(w);
 		}});
-		t.add(cerrar).center().bottom();
+		t.add(cerrar).center().bottom();	
 		
 		w.add(t).expand().fill();
 		

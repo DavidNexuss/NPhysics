@@ -19,10 +19,10 @@ public class Input implements InputProcessor {
 			System.exit(0);
 		}else if(keycode == Keys.B) {
 			
-			Scene.p.end();
+			//Scene.p.end();
 		}else if(keycode == Keys.R) {
 			
-			Scene.p = new Polygon();
+			//Scene.p = new Polygon();
 		}
 		return true;
 	}
@@ -45,7 +45,7 @@ public class Input implements InputProcessor {
 		// TODO Auto-generated method stub
 		if(!NPhysics.ui.touchUp(screenX, screenY, pointer, button))
 			NPhysics.scene.proccessClick(screenX, screenY);
-		return true;
+		return true;	
 	}
 
 	@Override

@@ -24,7 +24,7 @@ public class DesktopLauncher {
 			@Override
 			public boolean isMouseInWindow() {
 				
-				return Mouse.isInsideWindow();
+				return Mouse.isInsideWindow();	
 			}
 		}), config);
 	}
