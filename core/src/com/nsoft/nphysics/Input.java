@@ -1,6 +1,7 @@
 package com.nsoft.nphysics;
 
 import com.badlogic.gdx.Input.Keys;
+import com.nsoft.nphysics.GameState.GameCode;
 import com.badlogic.gdx.InputProcessor;
 
 public class Input implements InputProcessor {
@@ -19,7 +20,7 @@ public class Input implements InputProcessor {
 			System.exit(0);
 		}else if(keycode == Keys.B) {
 			
-			//Scene.p.end();
+			GameState.SwitchGameState(GameCode.CREATE_SOLID);
 		}else if(keycode == Keys.R) {
 			
 			//Scene.p = new Polygon();

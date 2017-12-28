@@ -31,12 +31,15 @@ public class Polygon{
 	float[] vertexs;
 	List<Integer> indexes;
 	public ArrayList<Float> Vertexs = new ArrayList<>();
+	Path2D path = new Path2D.Double();
 	public Polygon() {
 		
 	}
 	
 	public void addVertex(float x,float y) {
 		
+		if(isEmpty()) path.moveTo(x, y);
+		else path.lineTo(x, y);
 		if(!isReady) {
 
 			Vertexs.add(x);
@@ -79,6 +82,7 @@ public class Polygon{
 	public void end() {
 		
 		isReady = true;
+		path.closePath();
 		generateTraingles();
 		System.out.println("End");
 	}
@@ -94,10 +98,11 @@ public class Polygon{
 		
 		
 	}
-	void draw(ShapeRenderer rend) {
+	void draw(ShapeRenderer rend, Polygon selected) {
 		
 		if(isReady) {
 
+			if(selected == this) rend.setColor(0.3f, 0.3f, 0.8f, 0.6f);
 			for (int i = 0; i < indexes.size(); i+=3) {
 				
 				try {
@@ -111,10 +116,21 @@ public class Polygon{
 					e.printStackTrace();
 				}
 			}
+			
+			if(selected == this) rend.setColor(0.3f, 0.8f, 0.3f, 0.6f);
 		}
 	}
 	
 	public boolean isEmpty() {return Vertexs.isEmpty();}
+
+	public boolean hit(int x, int y) {
+		
+		if(path.contains(x, y)) {
+			
+			return true;
+		}
+		return false;
+	}
 	
 	
 }

@@ -20,5 +20,10 @@ public class GameState {
 	public static void setGameState(GameCode code) { current = code;}
 	public static void setCurrentState(GameCode state) {current = state;}
 	
+	public static void SwitchGameState(GameCode state) {
+		
+		if(current == state) current = GameCode.IDLE;
+		else current = state;
+	}
 	public static enum GameCode{IDLE,CREATE_SOLID,MOVE}
 }

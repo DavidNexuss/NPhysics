@@ -22,7 +22,7 @@ public class Scene extends Stage {
 	private boolean drawLines = true;
 	
 	public static ArrayList<Polygon> polygons = new ArrayList<>();
-	
+	public static Polygon selected;
 
 	private boolean current = false;
 	private final Vector3 Pos = new Vector3();
@@ -71,7 +71,7 @@ public class Scene extends Stage {
 		shape_renderer.setColor(0.3f, 0.8f, 0.3f, 0.6f);
 		for (Polygon polygon : polygons) {
 			
-			polygon.draw(shape_renderer);
+			polygon.draw(shape_renderer,selected);
 		}
 		shape_renderer.end();
 	}
@@ -86,6 +86,7 @@ public class Scene extends Stage {
 			
 			xcur = xcur > gridSize/2 ? xcur - (xcur % gridSize) : xcur + (xcur % gridSize);
 			ycur = ycur > gridSize/2 ? ycur - (ycur % gridSize) : ycur + (ycur % gridSize);
+			
 			shape_renderer.setColor(Color.RED);
 			shape_renderer.line(Pos1.x, Pos1.y, cur.x, cur.y);
 			shape_renderer.setColor(.8f, .8f, .8f, 1);
@@ -208,10 +209,28 @@ public class Scene extends Stage {
 				xcur = xcur % gridSize > gridSize/2 ? xcur + (gridSize - (xcur % gridSize) ): xcur - (xcur % gridSize);
 				ycur = ycur % gridSize > gridSize/2 ? ycur + (gridSize - (ycur % gridSize) ): ycur - (ycur % gridSize);
 					
-				if(!(xcur == Pos1.x&& ycur == Pos1.y)) {
+				if(!(xcur == Pos1.x && ycur == Pos1.y)) {
 					newLine(Pos1.x,Pos1.y, xcur, ycur);
 					Pos1.x = xcur;
 					Pos1.y = ycur;
+				}
+			}
+		}else if(GameState.current == GameCode.IDLE) {
+			
+			if(!polygons.isEmpty()) {
+			
+				Vector3 v = new Vector3(x, y, 0);
+				v = getCamera().unproject(v);
+				int ycur = (int) v.y;
+				int xcur = (int) v.x;
+				
+				for (Polygon polygon : polygons) {
+				
+					if(polygon.hit(xcur,ycur)) {
+						
+						selected = polygon;
+						break;
+					};
 				}
 			}
 		}
