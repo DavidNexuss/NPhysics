@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -50,11 +51,12 @@ public class Scene extends Stage {
 		shape_renderer.setColor(.8f, .8f, .8f, 1);
 	
 		init();
+		addActor(new ContextMenuItem("Test", new Texture(Gdx.files.internal("bin2.png")), ()->{}));
 	}
 	
 	public void init() {
 		
-		//processMove.start();
+		//processMove.start();	
 		
 	}
 	@Override
@@ -65,6 +67,7 @@ public class Scene extends Stage {
 		drawPolys();
 		super.draw();
 	}
+
 	private void drawPolys() {
 		
 		shape_renderer.begin(ShapeType.Filled);

@@ -29,6 +29,7 @@ public class Polygon{
 	
 	boolean isReady = false;
 	float[] vertexs;
+	private float[] center = new float[2];
 	List<Integer> indexes;
 	public ArrayList<Float> Vertexs = new ArrayList<>();
 	Path2D path = new Path2D.Double();
@@ -47,6 +48,56 @@ public class Polygon{
 		}
 	}
 	
+	public float getCenterX() {
+		
+		if(center[0] != 0) return center[0];
+		if(!isReady) throw new IllegalStateException();
+		
+		float[] v = getVertices();
+		float sum = 0;
+		for (int i = 0; i < v.length; i+=2) {
+			
+			sum+= v[i];
+		}
+		
+		return center[0] = sum/(v.length/2);
+		
+	}
+	
+	public float getCenterY() {
+		
+		if(center[1] != 0) return center[1];
+		if(!isReady) throw new IllegalStateException();
+		
+		float[] v = getVertices();
+		float sum = 0;
+		for (int i = 1; i < v.length; i+=2) {
+			
+			sum+= v[i];
+		}
+		
+		return center[1] = sum/(v.length/2);
+		
+	}
+	
+	public float[] getCenter() {
+		
+		if(center[0] != 0 && center[1] != 0 ) return center;
+		if(!isReady) throw new IllegalStateException();
+		
+		float[] v = getVertices();
+		float sumx = 0;
+		float sumy = 0;
+		
+		for (int i = 0; i < v.length; i++) {
+			
+			if(i % 2 == 0) sumx+= v[i];
+			else sumy+= v[i];
+		}
+		
+		return center = new float[] {sumx/(v.length/2),sumy/(v.length/2)};
+		
+	}
 	public float[] getVertices() {
 		
 		if(!isReady) throw new IllegalStateException();

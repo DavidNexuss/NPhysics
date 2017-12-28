@@ -37,6 +37,7 @@ public class NPhysics extends ApplicationAdapter {
 		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		scene.draw();
+		scene.act();
 		ui.draw();
 		ui.act();
 	}
