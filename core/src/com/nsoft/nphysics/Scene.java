@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.nsoft.nphysics.GameState.GameCode;
 
 public class Scene extends Stage {
@@ -19,6 +20,7 @@ public class Scene extends Stage {
 	public int gridSize = 30;
 	private static Thread processMove;
 	
+	public static Table ContextMenu;
 	private boolean drawGrid = true;
 	private boolean drawLines = true;
 	
@@ -51,7 +53,13 @@ public class Scene extends Stage {
 		shape_renderer.setColor(.8f, .8f, .8f, 1);
 	
 		init();
-		addActor(new ContextMenuItem("Test", new Texture(Gdx.files.internal("bin2.png")), ()->{}));
+		ContextMenu = new Table();
+		ContextMenu.add(new ContextMenuItem("test", new Texture(Gdx.files.internal("bin2.png")), ()->{})).center().pad(5);
+		ContextMenu.add(new ContextMenuItem("test", new Texture(Gdx.files.internal("bin2.png")), ()->{})).center().pad(5);
+		
+		ContextMenu.debug();
+		addActor(ContextMenu);
+		ContextMenu.setVisible(false);
 	}
 	
 	public void init() {
@@ -180,6 +188,15 @@ public class Scene extends Stage {
 			else System.err.println("Same line");
 		}
 	}
+	public static void select(Polygon p) {
+		
+		if(p == null)ContextMenu.setVisible(false);
+		else if(!ContextMenu.isVisible()) ContextMenu.setVisible(true);
+		selected = p;
+		System.err.println("ddwdwwddwwdwddwwd");
+		ContextMenu.setPosition(selected.getCenterX() - ContextMenu.getWidth()/2, selected.getCenterY() - ContextMenu.getHeight()/2);
+		
+	}
 	public void proccessClick(int x, int y) {
 		
 		if(GameState.current == GameCode.CREATE_SOLID) {
@@ -231,7 +248,7 @@ public class Scene extends Stage {
 				
 					if(polygon.hit(xcur,ycur)) {
 						
-						selected = polygon;
+						select(polygon);
 						break;
 					};
 				}

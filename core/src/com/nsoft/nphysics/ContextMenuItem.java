@@ -44,6 +44,6 @@ public class ContextMenuItem extends Actor {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		
-		if(isReady())batch.draw(p, Scene.selected.getCenterX() - getWidth()/2, Scene.selected.getCenterY() - getHeight()/2, getWidth(), getHeight());
+		if(isReady())batch.draw(p, getX(), getY(), getWidth(), getHeight());
 	}
 }

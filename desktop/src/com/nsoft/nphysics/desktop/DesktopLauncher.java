@@ -4,6 +4,7 @@ import java.awt.Toolkit;
 
 import org.lwjgl.input.Mouse;
 
+import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.nsoft.nphysics.IsInWindow;
@@ -16,7 +17,7 @@ public class DesktopLauncher {
 		config.vSyncEnabled = true;
 		config.foregroundFPS = 60;
 		config.samples = 4;
-		config.fullscreen = true;
+		config.fullscreen = false;
 		config.width = Toolkit.getDefaultToolkit().getScreenSize().width;
 		config.height = Toolkit.getDefaultToolkit().getScreenSize().height;
 		new LwjglApplication(new NPhysics(new IsInWindow() {
