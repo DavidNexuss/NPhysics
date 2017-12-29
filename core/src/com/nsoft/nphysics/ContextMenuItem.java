@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class ContextMenuItem extends Actor {
 
-	Texture p;
+	Texture p;	
 	String name;
 	
 	public ContextMenuItem(String name,Texture p,Runnable target) {

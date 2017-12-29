@@ -55,9 +55,9 @@ public class Scene extends Stage {
 		init();
 		ContextMenu = new Table();
 		ContextMenu.add(new ContextMenuItem("test", new Texture(Gdx.files.internal("bin2.png")), ()->{})).center().pad(5);
-		ContextMenu.add(new ContextMenuItem("test", new Texture(Gdx.files.internal("bin2.png")), ()->{})).center().pad(5);
+		ContextMenu.add(new ContextMenuItem("test", new Texture(Gdx.files.internal("plus2.png")), ()->{})).center().pad(5);
 		
-		ContextMenu.debug();
+		//ContextMenu.debug();
 		addActor(ContextMenu);
 		ContextMenu.setVisible(false);
 	}
@@ -193,7 +193,6 @@ public class Scene extends Stage {
 		if(p == null)ContextMenu.setVisible(false);
 		else if(!ContextMenu.isVisible()) ContextMenu.setVisible(true);
 		selected = p;
-		System.err.println("ddwdwwddwwdwddwwd");
 		ContextMenu.setPosition(selected.getCenterX() - ContextMenu.getWidth()/2, selected.getCenterY() - ContextMenu.getHeight()/2);
 		
 	}
