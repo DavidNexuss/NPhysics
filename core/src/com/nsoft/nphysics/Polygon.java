@@ -21,6 +21,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 
 import earcut4j.Earcut;
 
@@ -37,6 +38,10 @@ public class Polygon{
 		
 	}
 	
+	public static void loadDefaultProfile() {
+		
+		
+	}
 	public void addVertex(float x,float y) {
 		
 		if(isEmpty()) path.moveTo(x, y);
@@ -182,6 +187,4 @@ public class Polygon{
 		}
 		return false;
 	}
-	
-	
 }
