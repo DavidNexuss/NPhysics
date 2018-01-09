@@ -2,6 +2,8 @@ package com.nsoft.nphysics;
 
 import java.util.ArrayList;
 
+import org.omg.CORBA.PolicyTypeHelper;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -10,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.nsoft.nphysics.GameState.GameCode;
@@ -17,7 +20,13 @@ import com.nsoft.nphysics.GameState.GameCode;
 public class Scene extends Stage {
 
 	private ShapeRenderer shape_renderer = new ShapeRenderer();
-	public int gridSize = 30;
+	public static final int gridSize = 30;
+	public static int currentUnit;
+	
+	static { //UNIT CONVERSOR
+		
+		currentUnit = gridSize;
+	}
 	private static Thread processMove;
 	
 	public static Table ContextMenu;
@@ -73,6 +82,7 @@ public class Scene extends Stage {
 		if(drawGrid)drawGrid();
 		if(drawLines)drawLines();
 		drawPolys();
+		PolygonDefinition.step(getCamera().combined);
 		super.draw();
 	}
 
@@ -217,7 +227,7 @@ public class Scene extends Stage {
 				Pos1.set(xcur, ycur, 0);
 				
 				current = true;
-				polygons.add(new Polygon());
+				polygons.add(new Polygon(BodyType.DynamicBody));
 			}else {
 				
 				Vector3 v = new Vector3(x, y, 0);

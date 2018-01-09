@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.VertexBufferObjectWithVAO;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -29,19 +30,21 @@ public class Polygon{
 	
 	
 	boolean isReady = false;
+	
 	float[] vertexs;
+	
 	private float[] center = new float[2];
 	List<Integer> indexes;
 	public ArrayList<Float> Vertexs = new ArrayList<>();
 	Path2D path = new Path2D.Double();
-	public Polygon() {
+	private BodyType t;
+	PolygonDefinition def;
+	
+	public Polygon(BodyType t) {
 		
+		this.t = t;
 	}
 	
-	public static void loadDefaultProfile() {
-		
-		
-	}
 	public void addVertex(float x,float y) {
 		
 		if(isEmpty()) path.moveTo(x, y);
@@ -135,12 +138,23 @@ public class Polygon{
 		}
 	}
 	public boolean isEnded() {return isReady;}
+	
+	public PolygonDefinition getDefinition() {if(isEnded())return def; else throw new IllegalStateException();}
+	
 	public void end() {
 		
 		isReady = true;
 		path.closePath();
 		generateTraingles();
 		System.out.println("End");
+		
+		loadPhysicalDefinition();
+	}
+	
+	private void loadPhysicalDefinition() {
+		
+		def = new PolygonDefinition(this);
+		
 	}
 	
 	private void generateTraingles() {
@@ -186,5 +200,50 @@ public class Polygon{
 			return true;
 		}
 		return false;
+	}
+
+	public float[][] getTriangles(boolean relative,boolean usePhysicalValue) {
+		
+		if(!isReady) throw new IllegalStateException();
+		float[][] buf = new float[indexes.size()/3][6];
+		
+		for (int i = 0; i < indexes.size(); i+=3) {
+		
+			float[] triangle = new float[6];
+			
+			triangle[0] = getX(indexes.get(i));
+			triangle[1] = getY(indexes.get(i));
+			triangle[2] = getX(indexes.get(i + 1));
+			triangle[3] = getY(indexes.get(i + 1));
+			triangle[4] = getX(indexes.get(i + 2));
+			triangle[5] = getY(indexes.get(i + 2));
+			
+			buf[i/3] = relative ? getRelativeVertexs(triangle) : triangle;
+		}
+		
+		if(usePhysicalValue) {
+			
+			for (float[] fs : buf) {
+				
+				for (int i = 0; i < fs.length; i++) {
+					
+					fs[i] /= Scene.currentUnit;
+					System.out.println(fs[i]);
+				}
+			}
+		}
+		return buf;
+	}
+	public float[] getRelativeVertexs(float vertexA[]) {
+		// TODO Auto-generated method stub
+		if(!isReady) throw new IllegalStateException();
+		float[] rel = new float[vertexA.length];
+		
+		for (int i = 0; i < vertexA.length; i++) {
+			
+			if(i % 2 == 0) rel[i] = vertexA[i] - getCenterX();
+			else rel[i] = vertexA[i] - getCenterY();
+		}
+		return rel;
 	}
 }
