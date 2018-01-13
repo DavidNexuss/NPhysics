@@ -2,6 +2,7 @@ package com.nsoft.nphysics.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.scenes.scene2d.Action;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -25,6 +27,7 @@ import com.kotcrab.vis.ui.VisUI.SkinScale;
 import com.kotcrab.vis.ui.widget.Menu;
 import com.kotcrab.vis.ui.widget.MenuBar;
 import com.kotcrab.vis.ui.widget.MenuItem;
+import com.nsoft.nphysics.ContextMenuItem;
 import com.nsoft.nphysics.GameState;
 import com.nsoft.nphysics.GameState.GameCode;
 
@@ -100,7 +103,13 @@ public class UIScene extends Stage{
 		currentOperation.setFontScale(1.5f);
 		bar.setSize(getWidth(), 70);
 		
+		Table menu = new Table(skin);
+		menu.setWidth(50);
+		menu.add(new ContextMenuItem("test", new Texture(Gdx.files.internal("bin2.png")), ()->{}));
+		
+		
 		main.add(bar).align(Align.top).fillX().expand().row();
+	//	main.add(menu).align(Align.left).fillY();
 		main.setFillParent(true);
 		
 		main.add(currentOperation).align(Align.bottomLeft).pad(10);

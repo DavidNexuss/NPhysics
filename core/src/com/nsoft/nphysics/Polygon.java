@@ -9,14 +9,18 @@ import javax.swing.text.MaskFormatter;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.PolygonSprite;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.VertexBufferObjectWithVAO;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -30,11 +34,14 @@ public class Polygon{
 	
 	
 	boolean isReady = false;
-	
 	float[] vertexs;
 	
 	private float[] center = new float[2];
 	List<Integer> indexes;
+	
+	private float[] distances;
+	private float[] angles;
+	
 	public ArrayList<Float> Vertexs = new ArrayList<>();
 	Path2D path = new Path2D.Double();
 	private BodyType t;
@@ -149,6 +156,18 @@ public class Polygon{
 		System.out.println("End");
 		
 		loadPhysicalDefinition();
+		
+		angles = new float[vertexs.length/2];
+		for (int i = 0; i < angles.length; i++) {
+			
+			angles[i] = Float.MAX_VALUE;
+		}
+		
+		distances = new float[vertexs.length/2];
+		for (int i = 0; i < angles.length; i++) {
+			
+			distances[i] = Float.MAX_VALUE;
+		}
 	}
 	
 	private void loadPhysicalDefinition() {
@@ -156,6 +175,7 @@ public class Polygon{
 		def = new PolygonDefinition(this);
 		
 	}
+	
 	
 	private void generateTraingles() {
 		
@@ -168,10 +188,43 @@ public class Polygon{
 		
 		
 	}
+	
 	void draw(ShapeRenderer rend, Polygon selected) {
 		
 		if(isReady) {
 
+			if(PolygonDefinition.simulate) {
+				
+				for (int i = 0; i < indexes.size(); i+=3) {
+					
+					try {
+
+						int v1 = indexes.get(i);
+						int v2 = indexes.get(i + 1);
+						int v3 = indexes.get(i + 2);
+						
+						float h1 = getDistance(v1);
+						float h2 = getDistance(v2);
+						float h3 = getDistance(v3);
+						
+						float a1 = getAngle(v1) + def.getAngle();
+						float a2 = getAngle(v2) + def.getAngle();
+						float a3 = getAngle(v3) + def.getAngle();
+						
+				  rend.triangle(
+						  		def.getPosition().x * Scene.currentUnit + (MathUtils.cos(a1)*h1), //1
+						  		def.getPosition().y * Scene.currentUnit + (MathUtils.sin(a1)*h1),
+						  		def.getPosition().x * Scene.currentUnit + (MathUtils.cos(a2)*h2), //2
+						  		def.getPosition().y * Scene.currentUnit + (MathUtils.sin(a2)*h2),
+						  		def.getPosition().x * Scene.currentUnit + (MathUtils.cos(a3)*h3), //3
+						  		def.getPosition().y * Scene.currentUnit + (MathUtils.sin(a3)*h3));
+					} catch (Exception e) {
+						
+						e.printStackTrace();
+					}
+				}
+				
+			}else {
 			if(selected == this) rend.setColor(0.3f, 0.3f, 0.8f, 0.6f);
 			for (int i = 0; i < indexes.size(); i+=3) {
 				
@@ -187,7 +240,11 @@ public class Polygon{
 				}
 			}
 			
-			if(selected == this) rend.setColor(0.3f, 0.8f, 0.3f, 0.6f);
+			rend.end();
+			def.drawForces(rend);
+			rend.begin(ShapeType.Filled);
+			rend.setColor(0.3f, 0.8f, 0.3f, 0.6f);
+			}
 		}
 	}
 	
@@ -228,12 +285,55 @@ public class Polygon{
 				for (int i = 0; i < fs.length; i++) {
 					
 					fs[i] /= Scene.currentUnit;
-					System.out.println(fs[i]);
 				}
 			}
 		}
 		return buf;
 	}
+	
+	public float getDistance(int vertex) {
+		
+		if(distances[vertex] != Float.MAX_VALUE) return distances[vertex];
+		else {
+			
+			return distances[vertex] = (float) Math.sqrt(Math.pow(getRelativeToCenterX(getX(vertex)), 2) + Math.pow(getRelativeToCenterY(getY(vertex)), 2));
+		}
+		
+	}
+	
+	public float getAngle(int vertex) {
+		
+		if(angles[vertex] != Float.MAX_VALUE) return angles[vertex];
+		else {
+			
+			return angles[vertex] = MathUtils.atan2(getRelativeToCenterY(getY(vertex)), getRelativeToCenterX(getX(vertex)));
+		}
+	}
+	public float getRelativeToCenterX(float x) {
+		
+		return x - getCenterX();
+	}
+	
+	public float getRelativeToCenterY(float y) {
+		
+		return y - getCenterY();
+	}
+	
+	public float[] getRelativeToCenterXY(float[] pos) {
+		
+		return pos = new float[] {getRelativeToCenterX(pos[0]),getRelativeToCenterY(pos[1])};
+	}
+	
+	public float getRelativeToCornerX(float x) {
+		
+		return x - path.getBounds().x;
+	}
+	
+	public float getRelativeToCornerY(float y) {
+		
+		return y - path.getBounds().y;
+	}
+	
 	public float[] getRelativeVertexs(float vertexA[]) {
 		// TODO Auto-generated method stub
 		if(!isReady) throw new IllegalStateException();

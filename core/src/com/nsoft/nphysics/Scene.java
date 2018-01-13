@@ -88,15 +88,23 @@ public class Scene extends Stage {
 
 	private void drawPolys() {
 		
-		shape_renderer.begin(ShapeType.Filled);
-		shape_renderer.setColor(0.3f, 0.8f, 0.3f, 0.6f);
+			shape_renderer.begin(ShapeType.Filled);
+			shape_renderer.setColor(0.3f, 0.8f, 0.3f, 0.6f);
+		
 		for (Polygon polygon : polygons) {
 			
 			polygon.draw(shape_renderer,selected);
 		}
-		shape_renderer.end();
+		
+			shape_renderer.end();
+		
 	}
 	private void drawLines() {
+		
+		shape_renderer.setProjectionMatrix(getCamera().combined);
+		shape_renderer.begin(ShapeType.Line);
+
+		shape_renderer.setColor(.8f, .8f, .8f, 1);
 		
 		if(current) {
 			
@@ -147,7 +155,7 @@ public class Scene extends Stage {
 		}
 		
 		
-		
+		shape_renderer.end();
 		
 	}
 

@@ -5,9 +5,11 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -45,7 +47,7 @@ public class PolygonDefinition {
 	public static void step(Matrix4 projectionMatrix) {
 		
 		if(!simulate) return;
-		mundo.step(Gdx.graphics.getDeltaTime(), 8, 4);
+		mundo.step(Gdx.graphics.getDeltaTime(), 12, 8);
 		renderer.render(mundo, projectionMatrix);
 		
 	}
@@ -55,17 +57,16 @@ public class PolygonDefinition {
 		getWorld();
 		
 		BodyDef bdef = new BodyDef();
-		bdef.position.set(p.getRelativeVertexs(p.getCenter())[0],p.getRelativeVertexs(p.getCenter())[1]);
+		bdef.position.set(p.getCenterX()/Scene.currentUnit,p.getCenterY()/Scene.currentUnit);
 		bdef.type = state ? BodyType.DynamicBody : BodyType.StaticBody;
 
-		
 		state = true;
 		
 		body = mundo.createBody(bdef);
 
 		FixtureDef fdef = new FixtureDef();
-		fdef.friction = .2f;
-		fdef.restitution = .5f;
+		fdef.friction = 0.5f;
+		fdef.restitution = 0;
 		fdef.density = 1;
 		float[][] vertices = p.getTriangles(true,true);
 		
@@ -79,8 +80,23 @@ public class PolygonDefinition {
 			
 		}
 		shape.dispose();
-		simulate = true;
+		//simulate = true;
 		System.out.println("Mass: " + body.getMass());
+		addForce(Force.getGravityForce(new Vector2(p.getCenterX(), p.getCenterY()), body.getMass()));
+	}
+	
+	public Vector2 getPosition() {
+		
+		return body.getPosition();
+	}
+	public float getAngle() {
+		
+		return body.getAngle();
+	}
+	
+	public float getRotation() {
+		
+		return getAngle()* MathUtils.degRad;
 	}
 	public void addForce(Force c) {
 		
@@ -117,7 +133,7 @@ public class PolygonDefinition {
 
 class Force{
 	
-	private static float Gravity = -98f;
+	private static float Gravity = -9.8f;
 	private static boolean changeGravity = false;
 	
 	private static Vector2 GravityF;
@@ -133,13 +149,13 @@ class Force{
 		
 		this.force = force;
 		initial = center;
-		end = initial.add(force);
+		end = new Vector2(center.x + force.x, center.y + force.y);
 		allForces.add(this);
 	}
 	
 	public static Force getGravityForce(Vector2 centerMass,float mass) {
 		
-		return new Force(centerMass, Vector2.Zero.add(0, Gravity * mass)).setGravitable(true);
+		return new Force(centerMass, new Vector2(0, Gravity * mass)).setGravitable(true);
 	}
 	
 	public Force setGravitable(boolean gravity) {
@@ -186,10 +202,8 @@ class Force{
 	public void draw(ShapeRenderer rend,Color r) {
 	
 		rend.setColor(r);
-		rend.begin(ShapeType.Line);
-		rend.line(initial, end);
-		rend.end();
 		rend.begin(ShapeType.Filled);
+		rend.rectLine(initial.x, initial.y, end.x, end.y, 1);
 		if(initial.y > end.y)
 			rend.triangle(end.x, end.y, end.x + 2, end.y + 2, end.x - 2, end.y + 2);
 		else

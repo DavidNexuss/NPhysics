@@ -3,6 +3,7 @@ package com.nsoft.nphysics;
 import com.badlogic.gdx.Input.Keys;
 import com.nsoft.nphysics.GameState.GameCode;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 
 public class Input implements InputProcessor {
 
@@ -24,6 +25,21 @@ public class Input implements InputProcessor {
 		}else if(keycode == Keys.R) {
 			
 			//Scene.p = new Polygon();
+		}else if(keycode == Keys.S) {
+			
+			PolygonDefinition.simulate = !PolygonDefinition.simulate;
+		}else if(keycode == Keys.UP) {
+			
+			((OrthographicCamera)NPhysics.scene.getCamera()).translate(0, 30);
+		}else if(keycode == Keys.DOWN) {
+		
+			((OrthographicCamera)NPhysics.scene.getCamera()).translate(0, -30);
+		}else if(keycode == Keys.LEFT) {
+		
+			((OrthographicCamera)NPhysics.scene.getCamera()).translate(-30,0);
+		}else if(keycode == Keys.RIGHT) {
+	
+			((OrthographicCamera)NPhysics.scene.getCamera()).translate(30,0);
 		}
 		return true;
 	}
