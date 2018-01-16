@@ -27,6 +27,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.nsoft.nphysics.ui.UIScene;
 
 import earcut4j.Earcut;
 
@@ -45,6 +46,7 @@ public class Polygon{
 	public ArrayList<Float> Vertexs = new ArrayList<>();
 	Path2D path = new Path2D.Double();
 	private BodyType t;
+	private MenuWindow menuops;
 	PolygonDefinition def;
 	
 	public Polygon(BodyType t) {
@@ -95,6 +97,10 @@ public class Polygon{
 		
 	}
 	
+	public Vector2 getCenterV() {
+		
+		return new Vector2(getCenterX(), getCenterY());
+	}
 	public float[] getCenter() {
 		
 		if(center[0] != 0 && center[1] != 0 ) return center;
@@ -149,13 +155,15 @@ public class Polygon{
 	public PolygonDefinition getDefinition() {if(isEnded())return def; else throw new IllegalStateException();}
 	
 	public void end() {
-		
-		isReady = true;
+	
 		path.closePath();
-		generateTraingles();
-		System.out.println("End");
+
+		isReady = true;
 		
-		loadPhysicalDefinition();
+		generateTraingles();				//GENERATES THE TRIANGLES
+		computeArea();						//COMPUTES THE AREA
+		loadPhysicalDefinition();			//LOADS A PHYSICAL DEF
+		loadMenuWindow();					//CREATES THE CONFIG MENU	
 		
 		angles = new float[vertexs.length/2];
 		for (int i = 0; i < angles.length; i++) {
@@ -168,8 +176,19 @@ public class Polygon{
 			
 			distances[i] = Float.MAX_VALUE;
 		}
+		
 	}
 	
+	public void destroy() {
+		
+		NPhysics.scene.getActors().removeValue(menuops, true);
+	}
+	private void loadMenuWindow() {
+		
+		menuops = new MenuWindow(this, UIScene.skin);
+		menuops.setVisible(false);
+		NPhysics.scene.addActor(menuops);
+	}
 	private void loadPhysicalDefinition() {
 		
 		def = new PolygonDefinition(this);
@@ -259,6 +278,28 @@ public class Polygon{
 		return false;
 	}
 
+	private float area;
+	public float getArea() {return area;}
+	public float getAreaOfTriangleByIndex(int i) {
+		
+		return getAreaOfTraingle(getTriangles(true, true)[i]);
+	}
+	public float getAreaOfTraingle(float[] fs) {
+		
+		return (fs[0]*(fs[3] - fs[5]) + fs[2]*(fs[5] - fs[1]) + fs[4]*(fs[1] - fs[3]));
+	}
+	private void computeArea() {
+		
+		float[][] triangles = getTriangles(true, true);
+		float area = 0;
+		
+		for (float[] fs : triangles) {
+		
+			area += getAreaOfTraingle(fs);
+		}
+			
+		this.area = area;
+	}
 	public float[][] getTriangles(boolean relative,boolean usePhysicalValue) {
 		
 		if(!isReady) throw new IllegalStateException();
@@ -346,4 +387,40 @@ public class Polygon{
 		}
 		return rel;
 	}
+
+	public ArrayList<Line> lines = new ArrayList<>();
+	public void addLine(Line a) {
+		
+		lines.add(a);
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		// TODO Auto-generated method stub
+		super.finalize();
+	}
+
+	public void drawLines(ShapeRenderer shape_renderer) {
+		
+		for (Line a : lines) {
+			
+			a.draw(shape_renderer);
+		}
+	}
+
+	public MenuWindow getMenu() {
+		
+		if(isEnded()) return menuops;
+		else throw new IllegalStateException();
+	}
+
+	
+	
+	
+	// PHYSICAL VALUES
+	public void setNewDensity(float v) {
+		
+		
+	}
+
 }

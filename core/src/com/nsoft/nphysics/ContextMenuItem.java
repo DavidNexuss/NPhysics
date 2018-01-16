@@ -5,7 +5,10 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Event;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class ContextMenuItem extends Actor {
@@ -26,24 +29,22 @@ public class ContextMenuItem extends Actor {
 		}
 		
 		this.p = p;
-		addListener(new ClickListener() {
+		addListener(new InputListener() {
 			
 			@Override
-			public void clicked(InputEvent event, float x, float y) {
-				
+			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+				// TODO Auto-generated method stub
 				target.run();
+				return true;
 			}
-		});	
+		});
 		
 		setWidth(32);
 		setHeight((getWidth()/p.getWidth()) * p.getHeight());
 	}
-
-	public boolean isReady() {return Scene.selected != null;}
 	
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		
-		if(isReady())batch.draw(p, getX(), getY(), getWidth(), getHeight());
+		batch.draw(p, getX(), getY(), getWidth(), getHeight());
 	}
 }

@@ -28,7 +28,7 @@ public class NPhysics extends ApplicationAdapter {
 		scene = new Scene();
 		scene.setViewport(new ScreenViewport(scene.getCamera()));
 		ui = new UIScene();
-		Gdx.input.setInputProcessor(new Input());
+		Gdx.input.setInputProcessor(new InputMultiplexer(ui,scene,new Input()));
 		
 	}
 

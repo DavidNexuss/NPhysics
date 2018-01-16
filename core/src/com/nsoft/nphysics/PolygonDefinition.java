@@ -18,6 +18,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.MassData;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -38,6 +39,7 @@ public class PolygonDefinition {
 	public static boolean state = false; //DEBUG
 	public static boolean simulate = false;
 	private Body body;
+	private Polygon p;
 	private Fixture f;
 	
 	public static World getWorld() {
@@ -53,6 +55,8 @@ public class PolygonDefinition {
 	}
 	//BOX2D
 	public PolygonDefinition(Polygon p) {
+		
+		this.p = p;
 		
 		getWorld();
 		
@@ -82,11 +86,50 @@ public class PolygonDefinition {
 		shape.dispose();
 		//simulate = true;
 		System.out.println("Mass: " + body.getMass());
-		addForce(Force.getGravityForce(new Vector2(p.getCenterX(), p.getCenterY()), body.getMass()));
+		if(bdef.type == BodyType.DynamicBody)addForce(Force.getGravityForce(new Vector2(p.getCenterX(), p.getCenterY()), body.getMass()));
 	}
 	
-	public Vector2 getPosition() {
+	public float getMass() { return body.getMass();}
+	public void setMass(float v) {
 		
+		
+		for (int i = 0; i < body.getFixtureList().size; i++) {
+			
+			Fixture f = body.getFixtureList().get(i);
+			f.setDensity(p.getAreaOfTriangleByIndex(i)*(v/body.getFixtureList().size));
+		}
+		
+		body.resetMassData();
+	}
+	public float getDensity() {return body.getFixtureList().get(0).getDensity();};
+	public void setDensity(float v) {
+		
+		for (Fixture f : body.getFixtureList()) {
+			
+			f.setDensity(v*2/body.getFixtureList().size);
+		}
+		
+		body.resetMassData();
+	}
+	
+	public float getFriction() {return body.getFixtureList().get(0).getFriction();}
+	public void setFriction(float f) {
+		
+		for (Fixture fi : body.getFixtureList()) {
+			
+			fi.setFriction(f);
+		}
+	}
+	
+	public float getRestitution() {return body.getFixtureList().get(0).getRestitution();}
+	public void setRestitution(float f) {
+		
+		for (Fixture fi : body.getFixtureList()) {
+			
+			fi.setRestitution(f);
+		}
+	}
+	public Vector2 getPosition() {
 		return body.getPosition();
 	}
 	public float getAngle() {
@@ -127,7 +170,25 @@ public class PolygonDefinition {
 			else f.draw(r, Color.BLUE);
 		}
 	}
+
+	public BodyType getType() {
+		return body.getType();
+	}
+
+	Force debug;
+	public void aplyXForce(float x) {
+		
+		if(debug == null) debug = new Force(p.getCenterV(), new Vector2(x, 0));
+		else debug.setForce(new Vector2(debug.getForce().x + x, debug.getForce().y));
+		body.applyForceToCenter(x, 0, true);
+	}
 	
+	public void aplyYForce(float y) {
+		
+		if(debug == null) debug = new Force(p.getCenterV(), new Vector2(0, y));
+		else debug.setForce(new Vector2(debug.getForce().x, debug.getForce().y + y));
+		body.applyForceToCenter(0, y, true);
+	}
 }
 
 
@@ -188,7 +249,7 @@ class Force{
 	public static Vector2 getGravityVector() {
 		
 		if(GravityF == null || changeGravity) { changeGravity = false;return GravityF = new Vector2(0, getGravity());}
-		else return GravityF;
+		else return GravityF;	
 	}
 	public void setForce(Vector2 newForce) {
 		

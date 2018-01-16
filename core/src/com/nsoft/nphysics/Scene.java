@@ -3,6 +3,8 @@ package com.nsoft.nphysics;
 import java.util.ArrayList;
 
 import org.omg.CORBA.PolicyTypeHelper;
+import org.w3c.dom.events.Event;
+import org.w3c.dom.events.EventTarget;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -13,9 +15,14 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.nsoft.nphysics.GameState.GameCode;
+import com.nsoft.nphysics.ui.UIScene;
 
 public class Scene extends Stage {
 
@@ -60,13 +67,19 @@ public class Scene extends Stage {
 	public Scene() {
 		super();
 		shape_renderer.setColor(.8f, .8f, .8f, 1);
-	
 		init();
-		ContextMenu = new Table();
-		ContextMenu.add(new ContextMenuItem("test", new Texture(Gdx.files.internal("bin2.png")), ()->{})).center().pad(5);
-		ContextMenu.add(new ContextMenuItem("test", new Texture(Gdx.files.internal("plus2.png")), ()->{})).center().pad(5);
+		ContextMenu = new Table();	
+		ContextMenu.add(new ContextMenuItem("remove", new Texture(Gdx.files.internal("bin2.png")), ()->{
+			
+			polygons.remove(selected);
+			selected = null;
+			UIScene.hideActor(ContextMenu);
+		})).center().pad(5);
+		ContextMenu.add(new ContextMenuItem("configure", new Texture(Gdx.files.internal("plus2.png")), ()->{
+			
+			UIScene.showActor(selected.getMenu(), NPhysics.scene);
+		})).center().pad(5);
 		
-		//ContextMenu.debug();
 		addActor(ContextMenu);
 		ContextMenu.setVisible(false);
 	}
@@ -121,12 +134,13 @@ public class Scene extends Stage {
 			shape_renderer.setColor(.8f, .8f, .8f, 1);
 		}
 		
-		if(Line.lines.size() != 0) {
 			shape_renderer.setColor(Color.BLACK);
-			for (Line line : Line.lines) 
-				line.draw(shape_renderer);
+			for (Polygon polygon : polygons) {
+				
+				polygon.drawLines(shape_renderer);
+			}
 			shape_renderer.setColor(.8f, .8f, .8f, 1);
-		}
+		
 		shape_renderer.end();
 		
 	}
@@ -177,8 +191,8 @@ public class Scene extends Stage {
 	public void zoom(int zoom) {
 		
 		OrthographicCamera  c = ((OrthographicCamera)getCamera());
-		if(zoom > 0)c.zoom += .5f;
-		else c.zoom += -.5f;
+		if(zoom > 0)c.zoom *= 2;
+		else c.zoom /= 2;
 		System.out.println(c.zoom);
 	}
 	
@@ -187,11 +201,11 @@ public class Scene extends Stage {
 		if(!(x1 == x2 && y1 == y2)) {
 			
 			Line a = new Line(x1, y1, x2, y2);
-			if(!Line.exists(a)) {
+			Polygon p = polygons.get(polygons.size() -1);
+			if(!Line.exists(p,a)) {
+
 				
-				Line.lines.add(a);
-				Polygon p = polygons.get(polygons.size() -1);
-				
+				p.addLine(a);
 				if(p.isEmpty()) { p.addVertex(x1, y1); p.addVertex(x2, y2);}
 				else if(p.Vertexs.get(0) == x2 && p.Vertexs.get(1) == y2) {
 					
@@ -209,7 +223,8 @@ public class Scene extends Stage {
 	public static void select(Polygon p) {
 		
 		if(p == null)ContextMenu.setVisible(false);
-		else if(!ContextMenu.isVisible()) ContextMenu.setVisible(true);
+		else if(!ContextMenu.isVisible()) 
+			UIScene.showActor(ContextMenu, NPhysics.scene);
 		selected = p;
 		ContextMenu.setPosition(selected.getCenterX() - ContextMenu.getWidth()/2, selected.getCenterY() - ContextMenu.getHeight()/2);
 		

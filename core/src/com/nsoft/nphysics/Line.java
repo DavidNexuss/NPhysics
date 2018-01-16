@@ -7,8 +7,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class Line {
 
-
-	public static ArrayList<Line> lines = new ArrayList<>();
 	float x1,x2,y1,y2;
 	public Line(float x1, float y1,float x2,float y2) {
 		
@@ -24,9 +22,9 @@ public class Line {
 	}
 	
 	
-	public static boolean exists(Line a) {
+	public static boolean exists(Polygon p,Line a) {
 		
-		for (Line line: lines) {
+		for (Line line: p.lines) {
 			
 			if(line.x1 == a.x1 &&
 			   line.y1 == a.y1 &&

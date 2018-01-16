@@ -33,7 +33,7 @@ import com.nsoft.nphysics.GameState.GameCode;
 
 public class UIScene extends Stage{
 
-	Skin skin;
+	public static Skin skin = new Skin(Gdx.files.internal("skin-files/skin/neutralizer-ui.json"));
 	TextButton createMode;
 	TextButton moveMode;
 	Window helpWindow;
@@ -41,17 +41,16 @@ public class UIScene extends Stage{
 	
 	public UIScene() {
 		
-		skin = new Skin(Gdx.files.internal("skin-files/skin/neutralizer-ui.json"));
 		createMode = new TextButton("Crear Objeto",skin);
 		
-		VisUI.load(SkinScale.X2);
+		VisUI.load(skin);
 
 		Table main = new Table(skin);
 		Menu crear = new Menu("Crear Objeto");
 
 		MenuItem solid = new MenuItem("Crear Solido");
 			solid.addListener(new ClickListener() {
-				
+					
 				@Override
 				public void clicked(InputEvent event, float x, float y) {
 					
@@ -78,7 +77,7 @@ public class UIScene extends Stage{
 		public void clicked(InputEvent event, float x, float y) {
 			
 			super.clicked(event, x, y);
-			showWindow(helpWindow);
+			showActor(helpWindow);
 		}});
 		ayuda.addItem(ayudap);
 		Menu simulacion = new Menu("Simulacion");
@@ -119,11 +118,12 @@ public class UIScene extends Stage{
 		createHelpWindow();
 		
 		main.debug();
-		showWindow(helpWindow);
+		showActor(helpWindow);
 		//getRoot().debug();
 	}
 	
-	public void createDefaultWindowStructure(Window w) {
+
+	public static Table createDefaultWindowStructure(Window w) {
 		
 		Table t = new Table(skin);
 		t.setFillParent(true);
@@ -133,13 +133,16 @@ public class UIScene extends Stage{
 		public void clicked(InputEvent event, float x, float y) {
 			
 			super.clicked(event, x, y);
-			hideWindow(w);
+			hideActor(w);
 		}});
-		t.add(cerrar).center().bottom();	
+		Table root = new Table();
+		root.add(t).expand().fill().row();
+		root.add(cerrar).align(Align.bottom).pad(20);
+		w.add(root).expand().fill();
+
 		
-		w.add(t).expand().fill();
-		
-		getRoot().debug();
+		w.debug();
+		return t;
 	}
 	public void createHelpWindow() {
 		
@@ -150,17 +153,20 @@ public class UIScene extends Stage{
 		addActor(helpWindow);
 	}
 	
-	public void showWindow(Window w) {
+	public void showActor(Actor w) {
 		
+		showActor(w,this);
+	}
+	public static void showActor(Actor w,Stage a) {
 		if(w.isVisible())return;
-		w.setPosition(getWidth()/2 - w.getWidth()/2, getHeight()/2 - w.getHeight()/2 - 10);
-		w.center();
+		w.setPosition(a.getWidth()/2 - w.getWidth()/2, a.getHeight()/2 - w.getHeight()/2 - 10);
+		if(w instanceof Window) ((Window)w).center();
 		w.setColor(1, 1, 1, 0);
 		w.setVisible(true);
 		w.addAction(Actions.parallel(Actions.fadeIn(0.2f), Actions.moveBy(0, 10, 0.2f)));
 	}
 	
-	public void hideWindow(Window w) {
+	public static void hideActor(Actor w) {
 		
 		if(!w.isVisible()) return;
 		w.addAction(Actions.parallel(Actions.fadeOut(0.2f), Actions.moveBy(0, -10, 0.2f)));
@@ -174,7 +180,7 @@ public class UIScene extends Stage{
 			} catch (Exception e) {
 				
 			}
-		});
+		}).start();
 		
 	}
 }
