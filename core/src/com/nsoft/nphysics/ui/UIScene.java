@@ -3,6 +3,9 @@ package com.nsoft.nphysics.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+
+import javax.tools.Tool;
+
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.scenes.scene2d.Action;
@@ -37,7 +40,11 @@ public class UIScene extends Stage{
 	TextButton createMode;
 	TextButton moveMode;
 	Window helpWindow;
+	Window gridWindow;
 	Label currentOperation;
+	
+	public static Table ToolMenu;
+	public static Table GridMenu;
 	
 	public UIScene() {
 		
@@ -107,22 +114,55 @@ public class UIScene extends Stage{
 		menu.add(new ContextMenuItem("test", new Texture(Gdx.files.internal("bin2.png")), ()->{}));
 		
 		
+		main.setFillParent(true);	
 		main.add(bar).align(Align.top).fillX().expand().row();
 	//	main.add(menu).align(Align.left).fillY();
-		main.setFillParent(true);
-		
+		createToolMenu();
 		main.add(currentOperation).align(Align.bottomLeft).pad(10);
 		addActor(main);
 		
-		
+		createGridWindow();
 		createHelpWindow();
 		
 		main.debug();
 		showActor(helpWindow);
 		//getRoot().debug();
+		
 	}
 	
 
+	private void createToolMenu() {
+		
+		ToolMenu = new Table();
+		
+		addTool(new ContextMenuItem("Draw", null, ()->{
+			
+			GameState.setCurrentState(GameCode.CREATE_SOLID);
+		}));
+		addTool(new ContextMenuItem("Select", null, ()->{
+			
+			GameState.setCurrentState(GameCode.IDLE);
+		}));
+		addTool(new ContextMenuItem("New Grid", null,()->{
+			
+			showActor(gridWindow);
+		}));
+		addTool(new ContextMenuItem("Simulate", null,()->{
+			
+			GameState.setCurrentState(GameCode.MOVE);
+		}));
+		
+		ToolMenu.setPosition(0, 60);
+		ToolMenu.setSize(50, getHeight() - 120);
+		ToolMenu.debug();
+		addActor(ToolMenu);
+		
+	}
+	
+	private void addTool(ContextMenuItem i) {
+		
+		ToolMenu.add(i).pad(5).row();
+	}
 	public static Table createDefaultWindowStructure(Window w) {
 		
 		Table t = new Table(skin);
@@ -144,6 +184,25 @@ public class UIScene extends Stage{
 		w.debug();
 		return t;
 	}
+	
+	private void createGridWindow() {
+		
+		gridWindow = new Window("Crear cuadricula", skin);
+		gridWindow.setSize(getWidth()/2, getHeight()/2);
+		Table root = createDefaultWindowStructure(gridWindow);
+		
+		Table help = new Table();
+		
+		help.add(new Label("Crear cuadricula", skin)).expandX().row();
+		help.add(new Label("Explanation",skin)).expandX().row();
+		
+		root.add(help).expand().fill();
+		
+		gridWindow.setVisible(false);
+		root.debug();
+		addActor(gridWindow);
+		
+	}
 	public void createHelpWindow() {
 		
 		helpWindow = new Window("Ayuda", skin);
@@ -153,11 +212,11 @@ public class UIScene extends Stage{
 		addActor(helpWindow);
 	}
 	
-	public void showActor(Actor w) {
+	public void showActor(Window w) {
 		
 		showActor(w,this);
 	}
-	public static void showActor(Actor w,Stage a) {
+	public static void showActor(Window w,Stage a) {
 		if(w.isVisible())return;
 		w.setPosition(a.getWidth()/2 - w.getWidth()/2, a.getHeight()/2 - w.getHeight()/2 - 10);
 		if(w instanceof Window) ((Window)w).center();
@@ -166,8 +225,8 @@ public class UIScene extends Stage{
 		w.addAction(Actions.parallel(Actions.fadeIn(0.2f), Actions.moveBy(0, 10, 0.2f)));
 	}
 	
-	public static void hideActor(Actor w) {
-		
+	public static void hideActor(Window w) {
+
 		if(!w.isVisible()) return;
 		w.addAction(Actions.parallel(Actions.fadeOut(0.2f), Actions.moveBy(0, -10, 0.2f)));
 		new Thread(()->{

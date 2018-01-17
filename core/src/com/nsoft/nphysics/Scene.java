@@ -13,12 +13,14 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.nsoft.nphysics.GameState.GameCode;
@@ -37,6 +39,8 @@ public class Scene extends Stage {
 	private static Thread processMove;
 	
 	public static Table ContextMenu;
+
+	
 	private boolean drawGrid = true;
 	private boolean drawLines = true;
 	
@@ -64,7 +68,7 @@ public class Scene extends Stage {
 		});
 	}
 	
-	public Scene() {
+	public Scene() {	
 		super();
 		shape_renderer.setColor(.8f, .8f, .8f, 1);
 		init();
@@ -73,16 +77,18 @@ public class Scene extends Stage {
 			
 			polygons.remove(selected);
 			selected = null;
-			UIScene.hideActor(ContextMenu);
+			ContextMenu.setVisible(false);
 		})).center().pad(5);
 		ContextMenu.add(new ContextMenuItem("configure", new Texture(Gdx.files.internal("plus2.png")), ()->{
 			
-			UIScene.showActor(selected.getMenu(), NPhysics.scene);
+			UIScene.showActor(selected.getMenu(), NPhysics.ui);
 		})).center().pad(5);
 		
 		addActor(ContextMenu);
 		ContextMenu.setVisible(false);
+		
 	}
+	
 	
 	public void init() {
 		
@@ -222,11 +228,18 @@ public class Scene extends Stage {
 	}
 	public static void select(Polygon p) {
 		
-		if(p == null)ContextMenu.setVisible(false);
-		else if(!ContextMenu.isVisible()) 
-			UIScene.showActor(ContextMenu, NPhysics.scene);
+		if(p == null) {ContextMenu.setVisible(false); return;}
 		selected = p;
-		ContextMenu.setPosition(selected.getCenterX() - ContextMenu.getWidth()/2, selected.getCenterY() - ContextMenu.getHeight()/2);
+		if(!ContextMenu.isVisible()) {
+			
+			ContextMenu.setVisible(true);
+			ContextMenu.setPosition(selected.getCenterX() - ContextMenu.getWidth()/2, selected.getCenterY() - ContextMenu.getHeight()/2);
+		} 
+		else {
+			
+			ContextMenu.addAction(Actions.moveTo(selected.getCenterX() - ContextMenu.getWidth()/2, selected.getCenterY() - ContextMenu.getHeight()/2, 0.5f,Interpolation.pow3Out));
+		}
+		selected = p;
 		
 	}
 	public void proccessClick(int x, int y) {

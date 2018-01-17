@@ -23,7 +23,7 @@ public class MenuWindow extends Window {
 	
 	Table configs = new Table();
 	
-	public MenuWindow(Polygon p,Skin skin) {
+	public MenuWindow(Polygon p,Skin skin) {	
 		
 		super("Configuracion", skin);
 		this.p = p;

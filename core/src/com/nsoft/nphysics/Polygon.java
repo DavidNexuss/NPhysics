@@ -65,7 +65,7 @@ public class Polygon{
 		}
 	}
 	
-	public float getCenterX() {
+	public float getCenterX() {	
 		
 		if(center[0] != 0) return center[0];
 		if(!isReady) throw new IllegalStateException();
@@ -187,7 +187,7 @@ public class Polygon{
 		
 		menuops = new MenuWindow(this, UIScene.skin);
 		menuops.setVisible(false);
-		NPhysics.scene.addActor(menuops);
+		NPhysics.ui.addActor(menuops);
 	}
 	private void loadPhysicalDefinition() {
 		
@@ -257,7 +257,7 @@ public class Polygon{
 					
 					e.printStackTrace();
 				}
-			}
+			}	
 			
 			rend.end();
 			def.drawForces(rend);
