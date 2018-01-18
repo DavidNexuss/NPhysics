@@ -45,7 +45,6 @@ public class ContextMenuItem extends Actor {
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
 				
 				addAction(Actions.scaleTo(1.2f, 1.2f, 0.1f));
-				System.out.println("dwwdwd");
 				super.enter(event, x, y, pointer, fromActor);
 			}
 			
