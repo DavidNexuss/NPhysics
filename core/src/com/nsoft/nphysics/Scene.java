@@ -90,10 +90,12 @@ public class Scene extends Stage {
 		
 		addActor(ContextMenu);
 		ContextMenu.setVisible(false);
+
 		
 		addGrid(new Grid(shape_renderer, (int)(getWidth()/2), (int)getHeight()/2, gridSize, 0, (int)getWidth(), (int)getHeight()));
 		mainGrid = grids.get(0);
-		addGrid(new Grid(shape_renderer, 20, 20, 10, 0, 200, 100));
+		
+		addGrid(new Grid(shape_renderer, 0, 0, 30, 30, 300, 300));
 		
 	}
 	
@@ -126,6 +128,7 @@ public class Scene extends Stage {
 		shape_renderer.setColor(0.8f, 0.8f, 0.8f, 1f);
 		for (Grid grid : grids) {
 			
+			if(grid == mainGrid);
 			grid.draw();
 		}
 		

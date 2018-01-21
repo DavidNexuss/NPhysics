@@ -43,7 +43,7 @@ public class MenuWindow extends Window {
 			
 			p.def.setMass(v);
 			defs_map.get("Densidad").setNewValue(p.def.getDensity());
-		},p.def.getMass());
+		},()->{return p.def.getMass();});
 		
 		addDefiner("Friccion", new Slider(0, 100, 1f, false, skin), "%",(v)->{
 			
@@ -63,16 +63,24 @@ public class MenuWindow extends Window {
 		},0);
 		}
 	}
+	public void addDefiner(String name,Slider a,String append,Value v,GetValue g) {
+		
+		addDefiner(name, a, append, v, a.getValue(),g);
+	}
+	public void addDefiner(String name,Slider a,String append,Value v,float def) {
+		
+		addDefiner(name, a, append, v, def,null);
+	}
 	public void addDefiner(String name,Slider a,String append,Value v) {
 		
-		addDefiner(name, a, append, v, a.getValue());
+		addDefiner(name, a, append, v, a.getValue(),null);
 	}
-	public void addDefiner(String name,Slider a,String append,Value v,float defValue) {
+	public void addDefiner(String name,Slider a,String append,Value v,float defValue,GetValue g) {
 		
 		
 		
 		Label def = new Label(a.getValue() + append, getSkin());
-		Definer p = new Definer(name, a, def, append, v,defValue);
+		Definer p = new Definer(name, a, def, append, v,defValue,g);
 		
 		configs.add(new Label(name, getSkin())).pad(5).expandX();
 		configs.add(a).pad(5).expandX().fill().center();
@@ -99,23 +107,27 @@ public class MenuWindow extends Window {
 		String name;
 		String append;
 		Value v;
+		GetValue val;
 		Slider p;
 		Label def;
 		
+		public boolean useCustomGetter() {return val != null;}
 		private float old;
 		private boolean bubbles = false;
 		
 		public Definer(String name,Slider p, Label def,String append,Value v) {
 			
-			this(name, p, def, append, v, p.getValue());
+			this(name, p, def, append, v, p.getValue(),null);
 		}
-		public Definer(String name,Slider p, Label def,String append,Value v,float defaultValue) {
+		public Definer(String name,Slider p, Label def,String append,Value v,float defaultValue,GetValue val) {
 
 			this.name = name;
 			this.append = append;
 			this.v = v;
 			this.p = p;
 			this.def = def;
+			this.val = val;
+			if(useCustomGetter()) defaultValue = val.getValue();
 			System.out.println("Def val " + defaultValue);	
 			setNewValue(defaultValue);
 			old = p.getValue();
@@ -124,6 +136,7 @@ public class MenuWindow extends Window {
 		public void setNewValue(float f) {
 			
 			p.setValue(f);
+			def.setText(f + " " + append);
 			bubbles = true;
 		}
 		public void act() {
@@ -131,7 +144,9 @@ public class MenuWindow extends Window {
 			if(old != p.getValue()) {
 				
 				old = p.getValue();
+				if(!useCustomGetter())
 				def.setText(old + " " + append);
+				else def.setText(Math.round(val.getValue()) + " " + append);
 				if(!bubbles)v.operate(old);
 				else bubbles = false;
 				

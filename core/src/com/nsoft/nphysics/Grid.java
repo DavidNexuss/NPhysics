@@ -12,6 +12,8 @@ public class Grid{
 
 	private int centerX,centerY;
 	private int sizeX,sizeY;
+	private float[][] sin;
+	private float[][] cos;
 	private int unit;
 	private float angle;
 	private ShapeRenderer shape_renderer;
@@ -25,9 +27,51 @@ public class Grid{
 		this.sizeY = sizeY;
 		this.unit = unit;
 		this.angle = MathUtils.degreesToRadians * angle;
+		
+		if(angle != 0) {
+
+			cos= new float[sizeX/unit + 1][sizeY/unit + 1];
+			sin= new float[sizeX/unit + 1][sizeY/unit + 1];
+			
+			for (int i = 0; i < cos.length; i++) {
+				
+				for (int j = 0; j < cos.length; j++) {
+					
+					cos[i][j] = Float.MAX_VALUE;
+				}
+			}
+			
+			for (int i = 0; i < sin.length; i++) {
+				
+				for (int j = 0; j < sin.length; j++) {
+					
+					sin[i][j] = Float.MAX_VALUE;
+				}
+			}
+		}
 	
 	}
 
+	public float sin(int vx,int vy) {
+		
+		if(sin[vx + (sizeX/2)/unit][vy + (sizeY/2)/unit] == Float.MAX_VALUE) {
+			
+			return sin[vx + (sizeX/2)/unit][vy + (sizeY/2)/unit]  = vx*unit * MathUtils.cos(angle) + vy*unit*MathUtils.sin(angle);
+		}else {
+			
+			return sin[vx + (sizeX/2)/unit][vy + (sizeY/2)/unit] ;
+		}
+	}
+	public float cos(int vx,int vy) {
+		
+		if(cos[vx + (sizeX/2)/unit][vy + (sizeY/2)/unit] == Float.MAX_VALUE) {
+			
+			return cos[vx + (sizeX/2)/unit][vy + (sizeY/2)/unit]  = vx*unit * MathUtils.cos(angle) - vy*unit*MathUtils.sin(angle);
+		}else {
+			
+			return cos[vx + (sizeX/2)/unit][vy + (sizeY/2)/unit] ;
+		}
+	}
 	public void setPos(int centerx,int centery) {
 		
 		this.centerX = centerx;
@@ -53,11 +97,56 @@ public class Grid{
 				0
 		};
 	}
+	private float tan(float a) {
+		
+		return (float) (MathUtils.sin(a)/Math.cos(a));
+	}
 	public void draw() {
 		
 		if(angle != 0) {
 			
 			//TODO: Angle stuff;
+			
+			int yoffset = 3;
+			//HORIZONTAL
+			for (int y = -sizeY/2; y < sizeY/2; y+= unit) {
+				
+				
+				float x1 = -sizeX/2;
+				float y1 = y;
+				float x2 = sizeX/2;
+				float y2 = y;
+				
+				float x1a = x1 * MathUtils.cos(angle) - y1*MathUtils.sin(angle);
+				float y1a = x1 * MathUtils.cos(angle) + y1*MathUtils.sin(angle);
+				float x2a = x2 * MathUtils.cos(angle) - y2*MathUtils.sin(angle);
+				float y2a = x2 * MathUtils.cos(angle) + y2*MathUtils.sin(angle);
+				
+				shape_renderer.line(x1a + centerX,y1a + centerY +yoffset,x2a + centerX,y2a + centerY + yoffset);
+			}
+			
+			//VERTICAL
+			for (int x = -sizeX/2; x < sizeX/2; x+= unit) {
+				
+				float x1 = x;
+				float y1 = -sizeY/2;
+				float x2 = x;
+				float y2 = sizeY/2;
+				
+				/**
+				 * float x1a = (float) (x1 * Math.cos(angle) - y1*Math.sin(angle));
+				 *float y1a = (float) (x1 * Math.cos(angle) + y1*Math.sin(angle));
+				 *float x2a = (float) (x2 * Math.cos(angle) - y2*Math.sin(angle));
+				 *float y2a = (float) (x2 * Math.cos(angle) + y2*Math.sin(angle));
+				 */
+				float x1a = x1 * MathUtils.cos(angle) - y1*MathUtils.sin(angle);
+				float y1a = x1 * MathUtils.cos(angle) + y1*MathUtils.sin(angle);
+				float x2a = x2 * MathUtils.cos(angle) - y2*MathUtils.sin(angle);
+				float y2a = x2 * MathUtils.cos(angle) + y2*MathUtils.sin(angle);
+				
+				
+				shape_renderer.line(x1a + centerX,y1a + centerY +yoffset,x2a + centerX,y2a + centerY + yoffset);
+			}
 		}else {
 			
 			//HORIZONTAL
