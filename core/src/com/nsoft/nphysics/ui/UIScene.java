@@ -61,7 +61,7 @@ public class UIScene extends Stage{
 				@Override
 				public void clicked(InputEvent event, float x, float y) {
 					
-					GameState.setGameState(GameCode.CREATE_SOLID);
+					GameState.setCurrentState(GameCode.CREATE_SOLID);
 					super.clicked(event, x, y);
 				}
 			});
@@ -105,6 +105,7 @@ public class UIScene extends Stage{
 		Table bar = new Table(skin);
 		bar.add(options).fillX().expand();
 		currentOperation = new Label(GameState.getCurrentStateInfo(), skin);
+		GameState.addLabel(currentOperation);
 		currentOperation.setColor(Color.BLACK);
 		currentOperation.setFontScale(1.5f);
 		bar.setSize(getWidth(), 70);
@@ -142,6 +143,10 @@ public class UIScene extends Stage{
 		addTool(new ContextMenuItem("Select", null, ()->{
 			
 			GameState.setCurrentState(GameCode.IDLE);
+		}));
+		addTool(new ContextMenuItem("CreateForce", null, ()->{
+			
+			GameState.setCurrentState(GameCode.DRAW_FORCE);
 		}));
 		addTool(new ContextMenuItem("New Grid", null,()->{
 			

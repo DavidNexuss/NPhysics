@@ -145,7 +145,6 @@ public class PolygonDefinition {
 		
 		Polygonforces.add(c);
 	}
-	
 	public void removeForce(Force c) {
 		
 		if(Polygonforces.contains(c))Polygonforces.remove(c);
@@ -204,6 +203,9 @@ class Force{
 	
 	private boolean g;
 	
+	public boolean isInstant;
+	private boolean aplied;
+	
 	private static ArrayList<Force> allForces = new ArrayList<>();
 	
 	public Force(Vector2 center,Vector2 force) {
@@ -259,6 +261,26 @@ class Force{
 	public Vector2 getForce() {
 		
 		return force;
+	}
+	public void setInstant() {
+		
+		isInstant = true;
+		aplied = false;
+	}
+	public Vector2 getForceForComputing() {
+		
+		if(isInstant) {
+			
+			if(!aplied) {
+				
+				aplied = true;
+				return getForce();
+				
+			}else return null;
+		}else {
+			
+			return getForce();
+		}
 	}
 	public void draw(ShapeRenderer rend,Color r) {
 	

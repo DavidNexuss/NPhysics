@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -117,6 +118,7 @@ public class Scene extends Stage {
 		//if(drawGrid)drawGrid();
 		drawGrids();
 		if(drawLines)drawLines();
+		drawCurrentLine();
 		drawPolys();
 		PolygonDefinition.step(getCamera().combined);
 		super.draw();
@@ -147,29 +149,25 @@ public class Scene extends Stage {
 			shape_renderer.end();
 		
 	}
+	private void drawCurrentLine() {
+		shape_renderer.begin(ShapeType.Line);
+		if(current) {
+			
+			Pos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+			Vector3 cur = getCamera().unproject(Pos);
+			shape_renderer.setColor(Color.RED);
+			shape_renderer.line(Pos1.x, Pos1.y, cur.x, cur.y);
+			shape_renderer.setColor(.8f, .8f, .8f, 1);
+		}
+		shape_renderer.end();
+	}
 	private void drawLines() {
 		
 		shape_renderer.setProjectionMatrix(getCamera().combined);
 		shape_renderer.begin(ShapeType.Line);
 
-		shape_renderer.setColor(.8f, .8f, .8f, 1);
+		shape_renderer.setColor(Color.BLACK);
 		
-		if(current) {
-			
-			Pos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-			Vector3 cur = getCamera().unproject(Pos);
-			int ycur = (int) cur.y;
-			int xcur = (int) cur.x;
-			
-			xcur = xcur > gridSize/2 ? xcur - (xcur % gridSize) : xcur + (xcur % gridSize);
-			ycur = ycur > gridSize/2 ? ycur - (ycur % gridSize) : ycur + (ycur % gridSize);
-			
-			shape_renderer.setColor(Color.RED);
-			shape_renderer.line(Pos1.x, Pos1.y, cur.x, cur.y);
-			shape_renderer.setColor(.8f, .8f, .8f, 1);
-		}
-		
-			shape_renderer.setColor(Color.BLACK);
 			for (Polygon polygon : polygons) {
 				
 				polygon.drawLines(shape_renderer);
@@ -230,6 +228,9 @@ public class Scene extends Stage {
 			else System.err.println("Same line");
 		}
 	}
+	
+	public float vfx = Float.MAX_VALUE;
+	public float vfy,vf2x,vf2y = Float.MAX_VALUE;
 	public static void select(Polygon p) {
 		
 		if(p == null) {ContextMenu.setVisible(false); return;}
@@ -314,7 +315,41 @@ public class Scene extends Stage {
 					};
 				}
 			}
+		}else if(GameState.current == GameCode.DRAW_FORCE) {
+			
+			if(selected == null) return;
+			Vector3 pos = getMatrixPosition(x, y);
+			
+			System.out.println(vfx);
+			if(vfx == Float.MAX_VALUE) {
+				
+				vfx = mainGrid.snap(pos.x);
+				vfy = mainGrid.snap(pos.y);
+
+				Pos1.x = vfx;
+				Pos1.y = vfy;
+				current = true;
+				
+				System.out.println(vfx);
+			}else {
+				
+				current = false;
+				vf2x = mainGrid.snap(pos.x);
+				vf2y = mainGrid.snap(pos.y);
+				
+				Vector2 start = new Vector2(vfx, vfy);
+				Vector2 end = new Vector2(vf2x, vf2y);
+				
+				selected.def.addForce(new Force(start, end.sub(start)));
+				vfx = Float.MAX_VALUE;
+				
+			}
 		}
 		
+	}
+	
+	public Vector3 getMatrixPosition(float x,float y) {
+		
+		return getCamera().unproject(new Vector3(x, y, 0));
 	}
 }
