@@ -20,7 +20,6 @@ public class MenuWindow extends Window {
 	
 	Polygon p;
 	Table root;
-	
 	Table configs = new Table();
 	
 	public MenuWindow(Polygon p,Skin skin) {	
@@ -53,11 +52,11 @@ public class MenuWindow extends Window {
 			
 			p.def.setRestitution(v/100);
 		});
-		addDefiner("Fuerza X", new Slider(-1000, 1000, 10, false, skin), "N",(v)->{
+		addDefiner("Fuerza X", new Slider(-100*Force.forceScale, 100*Force.forceScale, 1*Force.forceScale, false, skin), "N",(v)->{
 			
 			p.def.aplyXForce(v);
 		},0);
-		addDefiner("Fuerza Y", new Slider(-1000, 1000, 10, false, skin), "N",(v)->{
+		addDefiner("Fuerza Y", new Slider(-100*Force.forceScale, 100*Force.forceScale, 1*Force.forceScale, false, skin), "N",(v)->{
 			
 			p.def.aplyYForce(v);
 		},0);

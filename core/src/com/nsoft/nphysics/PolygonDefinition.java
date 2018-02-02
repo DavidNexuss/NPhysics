@@ -10,8 +10,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -35,6 +37,7 @@ public class PolygonDefinition {
 	
 	private final static World mundo = new World(Force.getGravityVector(), true);
 	private final static Box2DDebugRenderer renderer = new Box2DDebugRenderer();
+	private static ArrayList<PolygonDefinition> currentPolys = new ArrayList<>();
 	
 	public static boolean state = false; //DEBUG
 	public static boolean simulate = false;
@@ -52,6 +55,11 @@ public class PolygonDefinition {
 		mundo.step(Gdx.graphics.getDeltaTime(), 12, 8);
 		renderer.render(mundo, projectionMatrix);
 		
+		for (PolygonDefinition polygonDefinition : currentPolys) {
+			
+			polygonDefinition.aplyForces();
+		}
+		
 	}
 	//BOX2D
 	public PolygonDefinition(Polygon p) {
@@ -61,6 +69,7 @@ public class PolygonDefinition {
 		getWorld();
 		
 		BodyDef bdef = new BodyDef();
+		System.out.println("c " + p.getCenterX()/Scene.currentUnit +" " + p.getCenterY()/Scene.currentUnit);
 		bdef.position.set(p.getCenterX()/Scene.currentUnit,p.getCenterY()/Scene.currentUnit);
 		bdef.type = state ? BodyType.DynamicBody : BodyType.StaticBody;
 
@@ -87,6 +96,8 @@ public class PolygonDefinition {
 		//simulate = true;
 		System.out.println("Mass: " + body.getMass());
 		if(bdef.type == BodyType.DynamicBody)addForce(Force.getGravityForce(new Vector2(p.getCenterX(), p.getCenterY()), body.getMass()));
+		
+		currentPolys.add(this);
 	}
 	
 	public float getMass() { return body.getMass();}
@@ -141,9 +152,28 @@ public class PolygonDefinition {
 		
 		return getAngle()* MathUtils.degRad;
 	}
+	
+	public void aplyForces() {
+		
+		for (Force c : Polygonforces) {
+			
+			
+			if(!c.isGravityForce() && !c.aplied) {
+				
+				Vector2 f = c.getForceForComputing();
+				body.applyLinearImpulse(f, c.getAplyPoint(), true);
+				System.out.println("v " + c.getForce().x + " " + c.getForce().y);
+				System.out.println("f "+ c.getAplyPoint().x + " " + c.getAplyPoint().y);
+			}
+			
+		}
+	}
 	public void addForce(Force c) {
 		
 		Polygonforces.add(c);
+		System.out.println("v " + c.getForce().x + " " + c.getForce().y);
+		System.out.println("f "+ c.getAplyPoint().x + " " + c.getAplyPoint().y);
+		
 	}
 	public void removeForce(Force c) {
 		
@@ -195,6 +225,8 @@ class Force{
 	
 	private static float Gravity = -9.8f;
 	private static boolean changeGravity = false;
+
+	public static int forceScale = 10;
 	
 	private static Vector2 GravityF;
 	private Vector2 initial;
@@ -203,14 +235,14 @@ class Force{
 	
 	private boolean g;
 	
-	public boolean isInstant;
-	private boolean aplied;
+	public boolean isInstant = true;
+	boolean aplied;
 	
 	private static ArrayList<Force> allForces = new ArrayList<>();
 	
 	public Force(Vector2 center,Vector2 force) {
 		
-		this.force = force;
+		this.force = force.scl(forceScale);
 		initial = center;
 		end = new Vector2(center.x + force.x, center.y + force.y);
 		allForces.add(this);
@@ -223,6 +255,11 @@ class Force{
 	
 	public Force setGravitable(boolean gravity) {
 		
+		if(gravity && !g) {
+			
+			force.scl(1/forceScale);
+			end = new Vector2(initial.x + force.x, initial.y + force.y);
+		}
 		g= gravity;
 		return this;
 	}
@@ -258,9 +295,13 @@ class Force{
 		this.force = newForce;
 		end = initial.add(newForce);
 	}
+	public Vector2 getAplyPoint() {
+		
+		return new Vector2(initial).scl(1f/Scene.currentUnit, 1f/Scene.currentUnit);
+	}
 	public Vector2 getForce() {
 		
-		return force;
+		return new Vector2(force).scl(1f/Scene.currentUnit, 1f/Scene.currentUnit);
 	}
 	public void setInstant() {
 		
@@ -268,7 +309,9 @@ class Force{
 		aplied = false;
 	}
 	public Vector2 getForceForComputing() {
-		
+
+		System.out.println("Force");
+		if(isGravityForce()) return null;
 		if(isInstant) {
 			
 			if(!aplied) {
@@ -286,11 +329,14 @@ class Force{
 	
 		rend.setColor(r);
 		rend.begin(ShapeType.Filled);
+		float angle = MathUtils.atan2(end.y - initial.y, end.x - initial.x);
 		rend.rectLine(initial.x, initial.y, end.x, end.y, 1);
-		if(initial.y > end.y)
-			rend.triangle(end.x, end.y, end.x + 2, end.y + 2, end.x - 2, end.y + 2);
-		else
-			rend.triangle(end.x, end.y, end.x + 2, end.y - 2, end.x - 2 , end.y - 2);
+		float[] pos = new float[]{0,0,-2,2,-2,-2};
+		Matrix3 a = new Matrix3().rotate(angle).translate(end.x, end.y);
+		rend.triangle(end.x, end.y, end.x + (-2*MathUtils.cos(angle) - 2*MathUtils.sin(angle)), 
+					end.y + (-2*MathUtils.cos(angle) + 2*MathUtils.sin(angle)), 
+					end.x + (-2*MathUtils.cos(angle) + 2*MathUtils.sin(angle)), 
+					end.y + (-2*MathUtils.cos(angle) - 2*MathUtils.sin(angle)));
 		rend.end();
 	}
 }

@@ -77,7 +77,15 @@ public class Scene extends Stage {
 		super();
 		shape_renderer.setColor(.8f, .8f, .8f, 1);
 		init();
-		ContextMenu = new Table();	
+		ContextMenu = new Table() {
+			
+			@Override
+			public void draw(Batch batch, float parentAlpha) {
+				
+				if(GameState.current == GameCode.DRAW_FORCE) return;
+				super.draw(batch, parentAlpha);
+			}
+		};	
 		ContextMenu.add(new ContextMenuItem("remove", new Texture(Gdx.files.internal("bin2.png")), ()->{
 			
 			polygons.remove(selected);
