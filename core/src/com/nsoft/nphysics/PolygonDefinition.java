@@ -32,10 +32,11 @@ public class PolygonDefinition {
 	static Window askForPhysicalInfo;
 	
 	//PHYSICAL
-	float mass;
+	private float mass;
 	ArrayList<Force> Polygonforces = new ArrayList<>();
 	
-	private final static World mundo = new World(Force.getGravityVector(), true);
+	private static World mundo = new World(Force.getGravityVector(), true);
+	private static World backup;
 	private final static Box2DDebugRenderer renderer = new Box2DDebugRenderer();
 	private static ArrayList<PolygonDefinition> currentPolys = new ArrayList<>();
 	
@@ -49,6 +50,29 @@ public class PolygonDefinition {
 		return mundo;
 	}
 	
+	public static void reset() {
+		
+		state = false;
+		currentPolys.clear();
+		mundo = new World(Force.getGravityVector(), true);
+		for (Polygon polygon : Scene.polygons) {
+			
+			ArrayList<Force> forcesB = new ArrayList<>();
+			for (Force force : polygon.def.Polygonforces) {
+				
+				if(!force.isGravityForce()) forcesB.add(force);
+				System.out.println(force.isGravityForce());
+			}
+			
+			Force[] B = new Force[forcesB.size()];
+			for (int i = 0; i < B.length; i++) {
+				
+				B[i] = forcesB.get(i);
+				System.out.println("aaa");
+			}
+			polygon.def = new PolygonDefinition(polygon, polygon.def.mass, polygon.def.density, polygon.def.friction, polygon.def.restitution, B);
+		}
+	}
 	public static void step(Matrix4 projectionMatrix) {
 		
 		if(!simulate) return;
@@ -61,8 +85,13 @@ public class PolygonDefinition {
 		}
 		
 	}
-	//BOX2D
 	public PolygonDefinition(Polygon p) {
+		
+		this(p,-1,1,0.5f,0,null);
+	}
+		
+	//BOX2D
+	public PolygonDefinition(Polygon p,float mass,float density,float friction,float restitution,Force ...forces) {
 		
 		this.p = p;
 		
@@ -76,11 +105,11 @@ public class PolygonDefinition {
 		state = true;
 		
 		body = mundo.createBody(bdef);
-
 		FixtureDef fdef = new FixtureDef();
-		fdef.friction = 0.5f;
-		fdef.restitution = 0;
-		fdef.density = 1;
+		fdef.friction = friction;
+		fdef.restitution = restitution;
+		fdef.density = density;
+		
 		float[][] vertices = p.getTriangles(true,true);
 		
 		PolygonShape shape = new PolygonShape();
@@ -93,6 +122,18 @@ public class PolygonDefinition {
 			
 		}
 		shape.dispose();
+		
+
+		if(mass != -1)setMass(mass);
+		else this.mass = -1;
+		this.friction = friction;
+		this.restitution = restitution;
+		this.density = density;
+		
+		if(forces != null) {
+			
+			addForces(forces);
+		}
 		//simulate = true;
 		System.out.println("Mass: " + body.getMass());
 		if(bdef.type == BodyType.DynamicBody)addForce(Force.getGravityForce(new Vector2(p.getCenterX(), p.getCenterY()), body.getMass()));
@@ -103,7 +144,7 @@ public class PolygonDefinition {
 	public float getMass() { return body.getMass();}
 	public void setMass(float v) {
 		
-		
+		mass = v;
 		for (int i = 0; i < body.getFixtureList().size; i++) {
 			
 			Fixture f = body.getFixtureList().get(i);
@@ -113,8 +154,10 @@ public class PolygonDefinition {
 		body.resetMassData();
 	}
 	public float getDensity() {return body.getFixtureList().get(0).getDensity();};
+	float density;
 	public void setDensity(float v) {
 		
+		density = v;
 		for (Fixture f : body.getFixtureList()) {
 			
 			f.setDensity(v*2/body.getFixtureList().size);
@@ -124,8 +167,10 @@ public class PolygonDefinition {
 	}
 	
 	public float getFriction() {return body.getFixtureList().get(0).getFriction();}
+	float friction;
 	public void setFriction(float f) {
 		
+		friction = f;
 		for (Fixture fi : body.getFixtureList()) {
 			
 			fi.setFriction(f);
@@ -133,8 +178,10 @@ public class PolygonDefinition {
 	}
 	
 	public float getRestitution() {return body.getFixtureList().get(0).getRestitution();}
+	float restitution;
 	public void setRestitution(float f) {
 		
+		restitution = f;
 		for (Fixture fi : body.getFixtureList()) {
 			
 			fi.setRestitution(f);
@@ -168,6 +215,14 @@ public class PolygonDefinition {
 			
 		}
 	}
+	
+	public void addForces(Force ... forces) {
+		
+		for (Force force : forces) {
+			
+			addForce(force);
+		}
+	}
 	public void addForce(Force c) {
 		
 		Polygonforces.add(c);
@@ -189,7 +244,7 @@ public class PolygonDefinition {
 		
 		return sum;
 	}
-	public boolean isGravitable() {return mass != 0;}
+	public boolean isGravitable() {return getMass() != 0;}
 	
 	public void drawForces(ShapeRenderer r) {
 		
@@ -207,16 +262,18 @@ public class PolygonDefinition {
 	Force debug;
 	public void aplyXForce(float x) {
 		
-		if(debug == null) debug = new Force(p.getCenterV(), new Vector2(x, 0));
-		else debug.setForce(new Vector2(debug.getForce().x + x, debug.getForce().y));
-		body.applyForceToCenter(x, 0, true);
+		Polygonforces.remove(debug);
+		if(debug != null) debug = new Force(p.getCenterV(), new Vector2(x, debug.getForce().y/Force.forceScale)); 
+		else  debug = new Force(p.getCenterV(), new Vector2(x, 0)); 
+		Polygonforces.add(debug);
 	}
 	
 	public void aplyYForce(float y) {
 		
-		if(debug == null) debug = new Force(p.getCenterV(), new Vector2(0, y));
-		else debug.setForce(new Vector2(debug.getForce().x, debug.getForce().y + y));
-		body.applyForceToCenter(0, y, true);
+		Polygonforces.remove(debug);
+		if(debug != null)debug = new Force(p.getCenterV(), new Vector2(debug.getForce().x/Force.forceScale, y));
+		else debug = new Force(p.getCenterV(), new Vector2(0, y));
+		Polygonforces.add(debug);
 	}
 }
 
@@ -240,6 +297,13 @@ class Force{
 	
 	private static ArrayList<Force> allForces = new ArrayList<>();
 	
+	public static void resetForces() {
+		
+		for (Force force : allForces) {
+			
+			force.aplied = false;
+		}
+	}
 	public Force(Vector2 center,Vector2 force) {
 		
 		this.force = force.scl(forceScale);

@@ -38,7 +38,7 @@ public class Input implements InputProcessor {
 			GameState.SwitchGameState(GameCode.CREATE_SOLID);
 		}else if(keycode == Keys.R) {
 			
-			//Scene.p = new Polygon();
+			PolygonDefinition.reset();
 		}else if(keycode == Keys.S) {
 			
 			PolygonDefinition.simulate = !PolygonDefinition.simulate;
