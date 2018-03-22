@@ -1,0 +1,27 @@
+package com.nsoft.nphysics.simulation;
+
+import java.lang.reflect.Field;
+
+import com.badlogic.gdx.utils.reflect.ReflectionException;
+
+public interface Dev {
+
+	public int uid = (int) (Math.random()*Integer.MAX_VALUE);
+	public default void say(String s) {
+		
+		System.out.println(getClass().getSimpleName() + ": " + this + " > " + s);
+	}
+	
+	/*
+	public default void val(String field) {
+		
+		try {
+			
+			Field t = this.getClass().getField(field);
+			say(t.getName() + ": " + t.get(this));
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}*/
+}
