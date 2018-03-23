@@ -19,6 +19,7 @@ public class Force implements Dev{
 	{
 		temporalStrenght[0] = NULL;
 		temporalStrenght[1] = NULL;
+		
 	}
 	
 	public boolean hasX() { return isDone() || temporalStrenght[0] != NULL;}
@@ -63,6 +64,10 @@ public class Force implements Dev{
 		
 	}
 	
+	public Force(float[] pos) {
+		
+		this(pos,new float[] {NULL,NULL});
+	}
 	public Force(float[] pos,float mod,float angle) {
 		
 		Vector2 position = new Vector2(pos[0], pos[1]);
@@ -78,21 +83,45 @@ public class Force implements Dev{
 	}
 	public Force setAngle(float angle) {
 		
-		if(this.angle != NULL) this.angle = angle;
+		if(this.angle == NULL) this.angle = angle;
 		return this;
 	}
 	
 	public Force setMod(float mod) {
 		
-		if(this.mod != NULL) this.mod = mod;
+		if(this.mod == NULL) this.mod = mod;
 		return this;
 	}
 	public void end() {
 		
-		if(!isComplete() && !isDone()) strenght = new Vector2(temporalStrenght[0], temporalStrenght[1]);
+		if(isComplete() && !isDone()) {
+			
+			strenght = new Vector2(temporalStrenght[0], temporalStrenght[1]);
+			
+			if(DEBUG) {
+				
+				say("Force solved: X: " + strenght.x + " Y: " + strenght.y);
+			}
+		} 
+		
 		
 	}
 	
+	public void setTempX(float x) {
+		
+		temporalStrenght[0] = x;
+	}
+	
+	public void setTempY(float y) {
+		
+		temporalStrenght[1] = y;
+	}
+	public void setForce(Vector2 newStrenght) {
+		
+		if(!isDone()) throw new IllegalStateException("Cant use that before solving the force!");
+		say("New force set: X: " + newStrenght.x + " Y: " + newStrenght.y);
+		strenght.set(newStrenght);
+	}
 	public boolean completeUsingTrigonometric() {
 		
 		if(isDone()) return true;
@@ -100,8 +129,11 @@ public class Force implements Dev{
 		Vector2 test = getTemporalVector();
 		if(test != null) {
 			
-			if(strenght == null) strenght = new Vector2();
-			strenght.set(test);
+			if(strenght == null) { 
+				
+				strenght = new Vector2();
+			}
+			setForce(test);
 			return true;
 		}else {
 			
@@ -117,12 +149,23 @@ public class Force implements Dev{
 		return !(temporalStrenght[0] == NULL || temporalStrenght[1] == NULL);
 	}
 	
-	private Vector2 tempStrenght = Vector2.Zero;
+	private Vector2 tempStrenght;
+	
+	public float[] getTemporalFloat() {
+		
+		if(isDone()) {
+			
+			return temporalStrenght = new float[] {strenght.x,strenght.y};
+		}
+		return temporalStrenght;
+		
+	}
 	public Vector2 getTemporalVector() {
 		
 		if(isDone()) return strenght;
-		else {
+		else if(tempStrenght == null){
 			
+			tempStrenght = Vector2.Zero;
 			if(temporalStrenght[0] != NULL && temporalStrenght[1] != NULL) {
 				
 				tempStrenght.set(temporalStrenght[0], temporalStrenght[1]);
@@ -174,6 +217,8 @@ public class Force implements Dev{
 			}
 		}return angle;
 	}
+	
+	public Vector2 getPosition() {return position;}
 	
 	public float getAngle(Vector2 ref) {
 		

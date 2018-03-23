@@ -19,7 +19,12 @@ public class DSL implements Dev{
 	boolean isYcomplete = true;
 	boolean isMcomplete = true;
 	
+	int Xu,Yu;
+	
 	ArrayList<Force> forces = new ArrayList<>();
+	
+	ArrayList<Force> xuforces = new ArrayList<>();
+	ArrayList<Force> yuforces = new ArrayList<>();
 	ArrayList<Force> uforces = new ArrayList<>();
 	
 	public DSL(Solid d) {
@@ -30,23 +35,97 @@ public class DSL implements Dev{
 			
 			forces.add(force);
 			force.completeUsingTrigonometric();
-			if(!force.hasX()) isXcomplete = false;
-			if(!force.hasY()) isYcomplete = false;
-			if(!force.hasX() && !force.hasY()) {
+			if(!force.hasX()) { isXcomplete = false; Xu++; xuforces.add(force);}
+			if(!force.hasY()) { isYcomplete = false; Yu++; yuforces.add(force);}
+			if(!force.hasX() || !force.hasY()) {
 				
 				uforces.add(force);
 			}
 		}
 		
+		if(isXcomplete || isYcomplete) {
+			
+			checkSum();
+		}
 		if(DEBUG) {
 			
 			say("Problem status:");
-			say("isXcomplete: " + isXcomplete);
-			say("isYcomplete: " + isYcomplete);
-			say("isZcomplete: " + isMcomplete);
+			if(uforces.size() > 0) {
+				
+				String fs = "";
+				for (Force force : uforces) {
+					
+					fs += Dev.getid(force) + ", ";
+				}
+
+				say("Unknown forces: " + uforces.size() + " : " + fs);
+			}
+
+			say("isXcomplete: " + isXcomplete + ", Unknown X: " + Xu);
+			say("isYcomplete: " + isYcomplete + ", Unknown Y: " + Yu);
 		}
+		
+		
 	}
 	
+	public void solve() {
+		
+		boolean usingMoments = useMoments();
+		
+		if(DEBUG) {
+			
+			say("Starting to solve...");
+			say("UsingMoments: " + usingMoments);
+		}
+		
+		if(usingMoments) {
+			
+			
+		}else {
+			
+			if(Xu > 1) throw new IllegalStateException("Impossible X unknown > 1");
+			if(Yu > 1) throw new IllegalStateException("Impossible Y unknown > 1");
+			
+			//SUM X
+			
+			float x = 0;
+			float y = 0;
+			
+			for (Force force : forces) {
+				
+				if(!xuforces.contains(force)) {
+					
+					x+= force.getTemporalFloat()[0];
+				}
+				
+				if(!yuforces.contains(force)) {
+					
+					y+= force.getTemporalFloat()[1];
+				}
+			}
+			
+			xuforces.get(0).setTempX(-x);
+			xuforces.get(0).end();
+			yuforces.get(0).setTempY(-y);
+			yuforces.get(0).end();
+			
+			isXcomplete = true;
+			isYcomplete = true;
+		}
+		
+		if(DEBUG) {say("Solved");}
+	}
+	public boolean useMoments() {
+		
+		Vector2 pos = forces.get(0).getPosition();
+		for (int i = 1; i < forces.size(); i++) {
+			
+			Vector2 posb = forces.get(i).getPosition();
+			if(!(pos.x == posb.x && pos.y == posb.y)) return true;
+		}
+		
+		return false;
+	}
 	public void checkSum() {
 		
 		if(!(isXcomplete && isYcomplete)) {

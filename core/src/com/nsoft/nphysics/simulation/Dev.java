@@ -9,9 +9,13 @@ public interface Dev {
 	public int uid = (int) (Math.random()*Integer.MAX_VALUE);
 	public default void say(String s) {
 		
-		System.out.println(getClass().getSimpleName() + ": " + this + " > " + s);
+		System.out.println(getClass().getSimpleName() + ": " + getid(this) + " > " + s);
 	}
 	
+	public static String getid(Object o) {
+		
+		return o.toString().substring(o.toString().indexOf("@"));
+	}
 	/*
 	public default void val(String field) {
 		
