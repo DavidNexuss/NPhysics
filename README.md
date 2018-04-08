@@ -3,6 +3,7 @@
 Simulador de físicas escrito en java, usa [Libgdx](https://libgdx.badlogicgames.com/), y [Earcut4j](https://github.com/earcut4j/earcut4j)  
 
 [![Simulador de situaciones dinámicas](https://img.youtube.com/vi/MVjDmQk1HLE/0.jpg)](https://www.youtube.com/watch?v=MVjDmQk1HLE)  
+YT: https://www.youtube.com/watch?v=MVjDmQk1HLE
 
 ## ¿Cómo funciona?  
 El objetivo del simulador es que puedas resolver problemas de estática, dibujando los objetos: sólidos, cuerdas, puntos de reacción, articulaciones y más..  
