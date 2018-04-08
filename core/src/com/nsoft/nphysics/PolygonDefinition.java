@@ -3,6 +3,9 @@ package com.nsoft.nphysics;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 
+
+import static com.nsoft.nphysics.ui.UIScene.skin;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -23,7 +26,13 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.MassData;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.nsoft.nphysics.ui.UIScene;
 
 public class PolygonDefinition {
 
@@ -33,9 +42,9 @@ public class PolygonDefinition {
 	
 	//PHYSICAL
 	private float mass;
-	ArrayList<Force> Polygonforces = new ArrayList<>();
+	ArrayList<RForce> PolygonRForces = new ArrayList<>();
 	
-	private static World mundo = new World(Force.getGravityVector(), true);
+	private static World mundo = new World(RForce.getGravityVector(), true);
 	private static World backup;
 	private final static Box2DDebugRenderer renderer = new Box2DDebugRenderer();
 	private static ArrayList<PolygonDefinition> currentPolys = new ArrayList<>();
@@ -54,20 +63,20 @@ public class PolygonDefinition {
 		
 		state = false;
 		currentPolys.clear();
-		mundo = new World(Force.getGravityVector(), true);
+		mundo = new World(RForce.getGravityVector(), true);
 		for (Polygon polygon : Scene.polygons) {
 			
-			ArrayList<Force> forcesB = new ArrayList<>();
-			for (Force force : polygon.def.Polygonforces) {
+			ArrayList<RForce> RForcesB = new ArrayList<>();
+			for (RForce RForce : polygon.def.PolygonRForces) {
 				
-				if(!force.isGravityForce()) forcesB.add(force);
-				System.out.println(force.isGravityForce());
+				if(!RForce.isGravityRForce()) RForcesB.add(RForce);
+				System.out.println(RForce.isGravityRForce());
 			}
 			
-			Force[] B = new Force[forcesB.size()];
+			RForce[] B = new RForce[RForcesB.size()];
 			for (int i = 0; i < B.length; i++) {
 				
-				B[i] = forcesB.get(i);
+				B[i] = RForcesB.get(i);
 				System.out.println("aaa");
 			}
 			polygon.def = new PolygonDefinition(polygon, polygon.def.mass, polygon.def.density, polygon.def.friction, polygon.def.restitution, B);
@@ -81,7 +90,7 @@ public class PolygonDefinition {
 		
 		for (PolygonDefinition polygonDefinition : currentPolys) {
 			
-			polygonDefinition.aplyForces();
+			polygonDefinition.aplyRForces();
 		}
 		
 	}
@@ -91,7 +100,7 @@ public class PolygonDefinition {
 	}
 		
 	//BOX2D
-	public PolygonDefinition(Polygon p,float mass,float density,float friction,float restitution,Force ...forces) {
+	public PolygonDefinition(Polygon p,float mass,float density,float friction,float restitution,RForce ...RForces) {
 		
 		this.p = p;
 		
@@ -130,13 +139,13 @@ public class PolygonDefinition {
 		this.restitution = restitution;
 		this.density = density;
 		
-		if(forces != null) {
+		if(RForces != null) {
 			
-			addForces(forces);
+			addRForces(RForces);
 		}
 		//simulate = true;
 		System.out.println("Mass: " + body.getMass());
-		if(bdef.type == BodyType.DynamicBody)addForce(Force.getGravityForce(new Vector2(p.getCenterX(), p.getCenterY()), body.getMass()));
+		if(bdef.type == BodyType.DynamicBody)addRForce(RForce.getGravityRForce(new Vector2(p.getCenterX(), p.getCenterY()), body.getMass()));
 		
 		currentPolys.add(this);
 	}
@@ -200,58 +209,58 @@ public class PolygonDefinition {
 		return getAngle()* MathUtils.degRad;
 	}
 	
-	public void aplyForces() {
+	public void aplyRForces() {
 		
-		for (Force c : Polygonforces) {
+		for (RForce c : PolygonRForces) {
 			
 			
-			if(!c.isGravityForce() && !c.aplied) {
+			if(!c.isGravityRForce() && !c.aplied) {
 				
-				Vector2 f = c.getForceForComputing();
+				Vector2 f = c.getRForceForComputing();
 				body.applyLinearImpulse(f, c.getAplyPoint(), true);
-				System.out.println("v " + c.getForce().x + " " + c.getForce().y);
+				System.out.println("v " + c.getRForce().x + " " + c.getRForce().y);
 				System.out.println("f "+ c.getAplyPoint().x + " " + c.getAplyPoint().y);
 			}
 			
 		}
 	}
 	
-	public void addForces(Force ... forces) {
+	public void addRForces(RForce ... RForces) {
 		
-		for (Force force : forces) {
+		for (RForce RForce : RForces) {
 			
-			addForce(force);
+			addRForce(RForce);
 		}
 	}
-	public void addForce(Force c) {
+	public void addRForce(RForce c) {
 		
-		Polygonforces.add(c);
-		System.out.println("v " + c.getForce().x + " " + c.getForce().y);
+		PolygonRForces.add(c);
+		System.out.println("v " + c.getRForce().x + " " + c.getRForce().y);
 		System.out.println("f "+ c.getAplyPoint().x + " " + c.getAplyPoint().y);
 		
 	}
-	public void removeForce(Force c) {
+	public void removeRForce(RForce c) {
 		
-		if(Polygonforces.contains(c))Polygonforces.remove(c);
+		if(PolygonRForces.contains(c))PolygonRForces.remove(c);
 	}
-	public Vector2 sumForces() {
+	public Vector2 sumRForces() {
 		
 		Vector2 sum = Vector2.Zero;
-		for (Force f: Polygonforces) {
+		for (RForce f: PolygonRForces) {
 			
-			sum.add(f.getForce());
+			sum.add(f.getRForce());
 		}
 		
 		return sum;
 	}
 	public boolean isGravitable() {return getMass() != 0;}
 	
-	public void drawForces(ShapeRenderer r) {
+	public void drawRForces(ShapeRenderer r) {
 		
-		for (Force f: Polygonforces) {
+		for (RForce f: PolygonRForces) {
 			
-			if(f.isGravityForce())f.draw(r, Color.RED);
-			else f.draw(r, Color.BLUE);
+			if(f.isGravityRForce())f.draw(r, Color.BLUE);
+			else f.draw(r, Color.RED);
 		}
 	}
 
@@ -259,26 +268,95 @@ public class PolygonDefinition {
 		return body.getType();
 	}
 
-	Force debug;
-	public void aplyXForce(float x) {
+	RForce debug;
+	public void aplyXRForce(float x) {
 		
-		Polygonforces.remove(debug);
-		if(debug != null) debug = new Force(p.getCenterV(), new Vector2(x, debug.getForce().y/Force.forceScale)); 
-		else  debug = new Force(p.getCenterV(), new Vector2(x, 0)); 
-		Polygonforces.add(debug);
+		if(debug != null) debug.setXRForce(x);
+		else {
+			debug = new RForce(p.getCenterV(), new Vector2(x, 0));
+			PolygonRForces.add(debug);
+		}
 	}
 	
-	public void aplyYForce(float y) {
+	public void aplyYRForce(float y) {
 		
-		Polygonforces.remove(debug);
-		if(debug != null)debug = new Force(p.getCenterV(), new Vector2(debug.getForce().x/Force.forceScale, y));
-		else debug = new Force(p.getCenterV(), new Vector2(0, y));
-		Polygonforces.add(debug);
+		if(debug != null) debug.setYRForce(y);
+		else {
+			debug = new RForce(p.getCenterV(), new Vector2(0, y));
+			PolygonRForces.add(debug);
+		}
 	}
 }
 
-
-class Force{
+class NumberField extends TextField{
+	
+	static public final char BACKSPACE = 8;
+	static public final char ENTER_DESKTOP = '\r';
+	static public final char ENTER_ANDROID = '\n';
+	static public final char TAB = '\t';
+	static public final char DELETE = 127;
+	static public final char BULLET = 149;
+	
+	Value val;
+	private float number;
+	private static final char[] accepted = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.',
+													BACKSPACE,ENTER_ANDROID,TAB,DELETE,BULLET};
+	
+	public NumberField(float number,Skin skin,Value val) {
+		super(number + "", skin);
+		this.number = number;
+		this.val = val;
+	}
+	
+	public void setValue(float number) {
+		
+		this.number = number;
+		setText(number + "");
+	}
+	
+	private Thread change() {
+		
+		return new Thread(()->{
+			
+			try {
+				Thread.sleep(40);
+				val.operate(number);
+			} catch (InterruptedException e) {
+				
+				e.printStackTrace();
+			}
+		});
+	}
+	public float getNumber() { return number = Float.parseFloat(getText()); }
+	
+	class NumberInputListener extends TextField.TextFieldClickListener{
+		
+		@Override
+		public boolean keyTyped(InputEvent event, char character) {
+			
+			boolean quit = true;
+			for (char c : accepted) {
+				
+				if(c == character) {
+					
+					quit = false;
+					break;
+				}
+			}
+			
+			if(character == ENTER_DESKTOP) {
+				
+				change().start();
+				return true;
+			}
+			if(quit) return true;
+			else return super.keyTyped(event, character);
+			
+		}
+	}
+	
+}
+class RForce{
 	
 	private static float Gravity = -9.8f;
 	private static boolean changeGravity = false;
@@ -286,49 +364,102 @@ class Force{
 	public static int forceScale = 10;
 	
 	private static Vector2 GravityF;
+	
 	private Vector2 initial;
 	private Vector2 end;
-	private Vector2 force;
+	private Vector2 RForce;
+	private Vector2 unit;
 	
 	private boolean g;
 	
 	public boolean isInstant = true;
 	boolean aplied;
 	
-	private static ArrayList<Force> allForces = new ArrayList<>();
+	private Table root;
+	private Window forceWindow;
 	
-	public static void resetForces() {
+	private static ArrayList<RForce> allRForces = new ArrayList<>();
+	
+	public static void resetRForces() {
 		
-		for (Force force : allForces) {
+		for (RForce RForce : allRForces) {
 			
-			force.aplied = false;
+			RForce.aplied = false;
 		}
 	}
-	public Force(Vector2 center,Vector2 force) {
+	public RForce(Vector2 center,Vector2 RForce) {
 		
-		this.force = force.scl(forceScale);
+		this.RForce = RForce.scl(forceScale);
 		initial = center;
-		end = new Vector2(center.x + force.x, center.y + force.y);
-		allForces.add(this);
-	}
-	
-	public static Force getGravityForce(Vector2 centerMass,float mass) {
+		end = new Vector2(center.x + RForce.x, center.y + RForce.y);
+		allRForces.add(this);
+
+		unit = new Vector2(RForce.nor().scl((float) Math.sqrt(RForce.len())*30).add(initial));
 		
-		return new Force(centerMass, new Vector2(0, Gravity * mass)).setGravitable(true);
+		initUI();
 	}
 	
-	public Force setGravitable(boolean gravity) {
+	NumberField NX,NY,NMod,NAngle;
+	
+	private void initUI() {
+		
+		root = new Table(skin);
+		
+		Table cartesian,polar;
+		
+		cartesian = new Table(skin);
+		polar = new Table(skin);
+		
+		Label cartesianTitle = new Label("Expresion cartesiana", skin);
+		Label polarTitle = new Label("Expresion polar", skin);
+		
+		Label X = new Label("X", skin);
+		Label Y = new Label("Y", skin);
+		
+		Label Mod = new Label("Módulo", skin);
+		Label Angle = new Label("Angulo", skin);
+		
+
+		NX = new NumberField(getForceX(), skin,(v)->{setXRForce(v);});
+		NY = new NumberField(getForceY(), skin,(v)->{setYRForce(v);});
+		NMod = new NumberField(getForceMod(), skin,(v)->{setMod(v);});
+		NAngle = new NumberField(getForceAngle(), skin,(v)->{setAngle(v);});
+		
+		cartesian.add(cartesianTitle).expand().fill().row();
+		cartesian.add(X).expand();
+		cartesian.add(NX).expand().row();
+		cartesian.add(Y).expand();
+		cartesian.add(NY).expand().row();
+		
+		polar.add(polarTitle).expand().fill().row();
+		polar.add(Mod).expand();
+		polar.add(NMod).expand().row();
+		polar.add(Angle).expand();
+		polar.add(NAngle).expand().row();
+		
+		
+		root.add(cartesian).expand();
+		root.add(polar).expand();
+		
+		
+	}
+	public static RForce getGravityRForce(Vector2 centerMass,float mass) {
+		
+		return new RForce(centerMass, new Vector2(0, Gravity * mass)).setGravitable(true);
+	}
+	
+	public RForce setGravitable(boolean gravity) {
 		
 		if(gravity && !g) {
 			
-			force.scl(1/forceScale);
-			end = new Vector2(initial.x + force.x, initial.y + force.y);
+			RForce.scl(1/forceScale);
+			end = new Vector2(initial.x + RForce.x, initial.y + RForce.y);
 		}
 		g= gravity;
 		return this;
 	}
 	
-	public boolean isGravityForce() { return g; }
+	public boolean isGravityRForce() { return g; }
 	
 	public static void setGravity(float newGravity) {
 		
@@ -340,11 +471,11 @@ class Force{
 	
 	private static void recalculateGravity(float newGravity) {
 		
-		for (Force force : allForces) {
+		for (RForce RForce : allRForces) {
 			
-			if (force.isGravityForce()) {
+			if (RForce.isGravityRForce()) {
 				
-				force.setForce(Vector2.Zero.add(0, newGravity/Gravity));
+				RForce.setRForce(Vector2.Zero.add(0, newGravity/Gravity));
 			}
 		}
 	}
@@ -354,53 +485,80 @@ class Force{
 		if(GravityF == null || changeGravity) { changeGravity = false;return GravityF = new Vector2(0, getGravity());}
 		else return GravityF;	
 	}
-	public void setForce(Vector2 newForce) {
+	public void setRForce(Vector2 newRForce) {
 		
-		this.force = newForce;
-		end = initial.add(newForce);
+		end = new Vector2(initial).sub(RForce);
+		this.RForce = newRForce;
+		end = new Vector2(initial).add(RForce);
+		unit = new Vector2(RForce).nor().scl((float) Math.sqrt(RForce.len())*30).add(initial);
 	}
+	
+	public void setXRForce(float x) {
+		
+		setRForce(new Vector2(x, RForce.y));
+	}
+	public void setYRForce(float y) {
+	
+		setRForce(new Vector2(RForce.x,y));
+	}
+	
+	//TODO: Implement Polar setter
+	public void setMod(float mod) {}
+	public void setAngle(float angle) {}
+	
 	public Vector2 getAplyPoint() {
 		
 		return new Vector2(initial).scl(1f/Scene.currentUnit, 1f/Scene.currentUnit);
 	}
-	public Vector2 getForce() {
+	public Vector2 getRForce() {
 		
-		return new Vector2(force).scl(1f/Scene.currentUnit, 1f/Scene.currentUnit);
+		return new Vector2(RForce).scl(1f/Scene.currentUnit, 1f/Scene.currentUnit);
 	}
+	
+	public float getForceX() { return RForce.x; }
+	public float getForceY() { return RForce.y; }
+	
+	public float getForceMod() { return RForce.len(); }
+	
+	public float getForceAngle(boolean degrees) { return degrees ? RForce.angle() : RForce.angleRad(); }
+	/**@return Angle in degrees*/ 
+	public float getForceAngle() {return getForceAngle(true);}
+	
+	
 	public void setInstant() {
 		
 		isInstant = true;
 		aplied = false;
 	}
-	public Vector2 getForceForComputing() {
+	public Vector2 getRForceForComputing() {
 
-		System.out.println("Force");
-		if(isGravityForce()) return null;
+		System.out.println("RForce");
+		if(isGravityRForce()) return null;
 		if(isInstant) {
 			
 			if(!aplied) {
 				
 				aplied = true;
-				return getForce();
+				return getRForce();
 				
 			}else return null;
 		}else {
 			
-			return getForce();
+			return getRForce();
 		}
 	}
 	public void draw(ShapeRenderer rend,Color r) {
 	
 		rend.setColor(r);
 		rend.begin(ShapeType.Filled);
-		float angle = MathUtils.atan2(end.y - initial.y, end.x - initial.x);
-		rend.rectLine(initial.x, initial.y, end.x, end.y, 1);
+		float angle = MathUtils.atan2(unit.y - initial.y, unit.x - initial.x);
+		rend.rectLine(initial.x, initial.y, unit.x, unit.y, 1);
 		float[] pos = new float[]{0,0,-2,2,-2,-2};
-		Matrix3 a = new Matrix3().rotate(angle).translate(end.x, end.y);
-		rend.triangle(end.x, end.y, end.x + (-2*MathUtils.cos(angle) - 2*MathUtils.sin(angle)), 
-					end.y + (-2*MathUtils.cos(angle) + 2*MathUtils.sin(angle)), 
-					end.x + (-2*MathUtils.cos(angle) + 2*MathUtils.sin(angle)), 
-					end.y + (-2*MathUtils.cos(angle) - 2*MathUtils.sin(angle)));
+		Matrix3 a = new Matrix3().rotate(angle).translate(unit.x, unit.y);
+		rend.triangle(unit.x, unit.y, unit.x + (-2*MathUtils.cos(angle) - 2*MathUtils.sin(angle)), 
+				unit.y + (-2*MathUtils.cos(angle) + 2*MathUtils.sin(angle)), 
+				unit.x + (-2*MathUtils.cos(angle) + 2*MathUtils.sin(angle)), 
+				unit.y + (-2*MathUtils.cos(angle) - 2*MathUtils.sin(angle)));
 		rend.end();
 	}
 }

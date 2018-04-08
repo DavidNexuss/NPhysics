@@ -260,7 +260,7 @@ public class Polygon{
 			}	
 			
 			rend.end();
-			def.drawForces(rend);
+			def.drawRForces(rend);
 			rend.begin(ShapeType.Filled);
 			rend.setColor(0.3f, 0.8f, 0.3f, 0.6f);
 			}

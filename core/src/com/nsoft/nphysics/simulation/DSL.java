@@ -20,7 +20,7 @@ public class DSL implements Dev{
 	boolean isMcomplete = true;
 	
 	int Xu,Yu;
-	
+	int relationu;
 	ArrayList<Force> forces = new ArrayList<>();
 	
 	ArrayList<Force> xuforces = new ArrayList<>();
@@ -37,6 +37,7 @@ public class DSL implements Dev{
 			force.completeUsingTrigonometric();
 			if(!force.hasX()) { isXcomplete = false; Xu++; xuforces.add(force);}
 			if(!force.hasY()) { isYcomplete = false; Yu++; yuforces.add(force);}
+			
 			if(!force.hasX() || !force.hasY()) {
 				
 				uforces.add(force);
@@ -80,12 +81,42 @@ public class DSL implements Dev{
 		
 		if(usingMoments) {
 			
+			Force point = forces.get(0);
+			int n = ((point.hasX() ? 0 : 1) + (point.hasY() ? 0 : 1));
+			for (int i = 1; i < forces.size(); i++) {
+				
+				if(((forces.get(i).hasX() ? 0 : 1) + (forces.get(i).hasY() ? 0 : 1)) > n) {
+					
+					n = ((forces.get(i).hasX() ? 0 : 1) + (forces.get(i).hasY() ? 0 : 1));
+					point = forces.get(i);
+				}
+			}
 			
+			float moment = 0;
+
+			for (Force force : forces) {
+				
+				if(force != point && force.isDone()) {
+					
+					float angle = force.getVectorDist(point).angleRad();
+					Vector2 unit = new Vector2((float)Math.cos(angle), (float)Math.sin(angle));
+					
+					float fangle = force.getTemporalVector().angleRad(unit);
+					float zangle = force.getTemporalVector().angleRad();
+					
+					float dist = force.getDist(point);
+					float mod = force.mod();
+					
+					Vector2 distance = force.getVectorDist(point);
+					moment += dist*Math.sin((zangle-fangle)*fangle/Math.abs(fangle))*mod * (distance.y < 0 ? -1 : 1);
+					
+				}
+			}
+			
+			
+			System.out.println(moment);
 		}else {
-			
-			if(Xu > 1) throw new IllegalStateException("Impossible X unknown > 1");
-			if(Yu > 1) throw new IllegalStateException("Impossible Y unknown > 1");
-			
+					
 			//SUM X
 			
 			float x = 0;
@@ -104,10 +135,13 @@ public class DSL implements Dev{
 				}
 			}
 			
-			xuforces.get(0).setTempX(-x);
-			xuforces.get(0).end();
-			yuforces.get(0).setTempY(-y);
-			yuforces.get(0).end();
+			for (Force force : uforces) {
+				
+				force.setTempX(-x);
+				force.end();
+				force.setTempY(-y);
+				force.end();
+			}
 			
 			isXcomplete = true;
 			isYcomplete = true;
@@ -117,14 +151,7 @@ public class DSL implements Dev{
 	}
 	public boolean useMoments() {
 		
-		Vector2 pos = forces.get(0).getPosition();
-		for (int i = 1; i < forces.size(); i++) {
-			
-			Vector2 posb = forces.get(i).getPosition();
-			if(!(pos.x == posb.x && pos.y == posb.y)) return true;
-		}
-		
-		return false;
+		return Xu > 1 || Yu > 1;
 	}
 	public void checkSum() {
 		
@@ -160,7 +187,7 @@ public class DSL implements Dev{
 				
 				for (Force force : forces) {
 					
-					sum+= force.mod() * Math.cos(force.getAngle());
+					sum+= force.mod() * Math.cos(force.getAngleRadians());
 				}
 				return sum;
 			}else throw new IllegalStateException();
@@ -172,7 +199,7 @@ public class DSL implements Dev{
 				
 				for (Force force : forces) {
 					
-					sum+= force.mod() * Math.sin(force.getAngle());
+					sum+= force.mod() * Math.sin(force.getAngleRadians());
 				}
 				return sum;
 			}else throw new IllegalStateException();

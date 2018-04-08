@@ -8,6 +8,28 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
+/**
+ * 
+ * @author Usuari
+ *
+ *
+ *Grid Shader
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    
+    int x = int((mod(fragCoord.x + iMouse.x,40.0)));
+    int y = int((mod(fragCoord.y + iMouse.y,40.0)));
+    
+    if(x == 0 || y == 0){
+    
+    	fragColor = vec4(0.2,0.2,0.2,1.0);
+    }else{
+    
+    	fragColor = vec4(1.0,1.0,1.0,1.0);
+    }
+    // Output to screen
+}
+ */
 public class Grid{
 
 	private int centerX,centerY;
@@ -163,4 +185,6 @@ public class Grid{
 		}
 		
 	}
+	
+	public int getUnit() { return unit;}
 }

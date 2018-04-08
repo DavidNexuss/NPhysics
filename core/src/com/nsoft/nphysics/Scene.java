@@ -63,7 +63,10 @@ public class Scene extends Stage {
 				while(true) {
 					
 					Thread.sleep(10);
-					if(NPhysics.mouse.isMouseInWindow())NPhysics.scene.processMove(Gdx.input.getX(), Gdx.input.getY());
+					if(NPhysics.mouse.isMouseInWindow() && 
+							GameState.current == GameCode.MOVE) {
+						NPhysics.scene.processMove(Gdx.input.getX(), Gdx.input.getY());
+					}
 					
 				}
 			} catch (Exception e) {
@@ -76,7 +79,7 @@ public class Scene extends Stage {
 	public Scene() {	
 		super();
 		shape_renderer.setColor(.8f, .8f, .8f, 1);
-		init();
+
 		ContextMenu = new Table() {
 			
 			@Override
@@ -104,14 +107,15 @@ public class Scene extends Stage {
 		addGrid(new Grid(shape_renderer, (int)(getWidth()/2), (int)getHeight()/2, gridSize, 0, (int)getWidth(), (int)getHeight()));
 		mainGrid = grids.get(0);
 		
-		addGrid(new Grid(shape_renderer, 0, 0, 30, 30, 300, 300));
 		
+		init();
 	}
 	
 	
 	public void init() {
 		
-		//processMove.start();	
+		processMove.start();
+
 		
 	}
 	
@@ -122,7 +126,6 @@ public class Scene extends Stage {
 	@Override
 	public void draw() {
 		
-		mainGrid.setPos((int)getCamera().position.x, (int)getCamera().position.y);
 		//if(drawGrid)drawGrid();
 		drawGrids();
 		if(drawLines)drawLines();
@@ -188,15 +191,19 @@ public class Scene extends Stage {
 
 	public void processMove(int screenX, int screenY) {
 		
-		if(screenX < getWidth()/10)
+		if(screenX < 10)
 			getCamera().translate((float) -Math.sqrt((getWidth()/10 - screenX)), 0, 0);
-		if(screenX > getWidth()*9/10)
+		if(screenX > getWidth() - 10)
 			getCamera().translate((float) Math.sqrt(screenX - getWidth()*9/10), 0, 0);
 		if(screenY < getHeight()/10)
 			getCamera().translate(0,(float) Math.sqrt(getHeight()/10 - screenY), 0);
 		if(screenY > getHeight()*9/10)
 			getCamera().translate(0,(float) -Math.sqrt((screenY - getHeight()*9/10)), 0);
 		
+
+		mainGrid.setPos(
+				(int)getCamera().position.x - (int)getCamera().position.x % mainGrid.getUnit(), 
+				(int)getCamera().position.y - (int)getCamera().position.y % mainGrid.getUnit() - 10);
 		getCamera().update();
 		
 	}
@@ -254,6 +261,11 @@ public class Scene extends Stage {
 		}
 		selected = p;
 		
+	}
+
+	public OrthographicCamera getOrtographicCamera() {
+		
+		return (OrthographicCamera)getCamera();
 	}
 	public void proccessClick(int x, int y) {
 		
@@ -348,7 +360,7 @@ public class Scene extends Stage {
 				Vector2 start = new Vector2(vfx, vfy);
 				Vector2 end = new Vector2(vf2x, vf2y);
 				
-				selected.def.addForce(new Force(start, end.sub(start)));
+				selected.def.addRForce(new RForce(start, end.sub(start)));
 				vfx = Float.MAX_VALUE;
 				
 			}
@@ -360,4 +372,6 @@ public class Scene extends Stage {
 		
 		return getCamera().unproject(new Vector3(x, y, 0));
 	}
+
+
 }

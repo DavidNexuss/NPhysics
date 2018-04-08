@@ -52,14 +52,6 @@ public class MenuWindow extends Window {
 			
 			p.def.setRestitution(v/100);
 		});
-		addDefiner("Fuerza X", new Slider(-100*Force.forceScale, 100*Force.forceScale, 1*Force.forceScale, false, skin), "N",(v)->{
-			
-			p.def.aplyXForce(v);
-		},0);
-		addDefiner("Fuerza Y", new Slider(-100*Force.forceScale, 100*Force.forceScale, 1*Force.forceScale, false, skin), "N",(v)->{
-			
-			p.def.aplyYForce(v);
-		},0);
 		}
 	}
 	public void addDefiner(String name,Slider a,String append,Value v,GetValue g) {

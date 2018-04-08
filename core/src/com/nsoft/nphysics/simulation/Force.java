@@ -1,6 +1,7 @@
 package com.nsoft.nphysics.simulation;
 
 import com.badlogic.gdx.math.Vector2;
+
 import static com.nsoft.nphysics.simulation.Core.*;
 
 public class Force implements Dev{
@@ -8,7 +9,7 @@ public class Force implements Dev{
 	public static final float NULL = Float.MAX_VALUE;
 	public static float G = 9.81f;
 	
-	private Vector2 position = Vector2.Zero;
+	private Vector2 position = new Vector2(Vector2.Zero);
 	private Vector2 strenght;
 
 	private float angle = NULL;
@@ -54,7 +55,8 @@ public class Force implements Dev{
 			}
 			
 			if(DEBUG) {say("Incomplete force: X: " + (str[0] == NULL ? "NULL" : str[0]) + 
-											" Y: " + (str[1] == NULL ? "NULL" : str[1]));}
+											" Y: " + (str[1] == NULL ? "NULL" : str[1]) +
+											" Angle: " + (getAngleDegrees() == NULL ? "NULL" : getAngleDegrees()));}
 		}else {
 			
 			Vector2 strenght = new Vector2(str[0], str[1]);
@@ -81,12 +83,42 @@ public class Force implements Dev{
 		if(!completeUsingTrigonometric()) throw new IllegalStateException("Error in parsing polar expression to cartesian");
 		else if(DEBUG) say("Force succesfully casted from polar to cartesian. X: " + strenght.x + " Y: " + strenght.y);
 	}
-	public Force setAngle(float angle) {
+	
+	public Force setAngleDegrees(float angle) {
+		
+		if(this.angle == NULL) this.angle = (float) Math.toRadians(angle);
+		say("Angle changed: " + angle);
+		return this;
+	}
+
+	public Force setAngleRadians(float angle) {
 		
 		if(this.angle == NULL) this.angle = angle;
+		say("Angle changed: " + angle);
 		return this;
 	}
 	
+	public float getAngleRadians() {
+		
+		if(angle == Float.MAX_VALUE) {
+			
+			if(isComplete()) {
+
+				return angle = strenght.angleRad();
+			}
+		}return angle;
+	}
+
+	public float getAngleDegrees() {
+		
+		if(angle == Float.MAX_VALUE) {
+			
+			if(isComplete()) {
+
+				return angle = strenght.angle();
+			}
+		}return (float) Math.toDegrees(angle);
+	}
 	public Force setMod(float mod) {
 		
 		if(this.mod == NULL) this.mod = mod;
@@ -201,28 +233,52 @@ public class Force implements Dev{
 		
 		if(mod == Float.MAX_VALUE) {
 			
-			if(isComplete()) {
+			if(isDone()) {
 				
 				return mod = strenght.len();
 			}
 		}return mod;
 	}
-	public float getAngle() {
-		
-		if(angle == Float.MAX_VALUE) {
-			
-			if(isComplete()) {
-
-				return angle = strenght.angleRad();
-			}
-		}return angle;
-	}
+	
+	
+	public float getDist(Force b) {
+		b.position = b.position;
+		position = position;
+		return position.dst(b.position);
+		}
+	public Vector2 getVectorDist(Force b) { return new Vector2(b.position).sub(position);}
 	
 	public Vector2 getPosition() {return position;}
 	
 	public float getAngle(Vector2 ref) {
 		
 		return strenght.angleRad(ref);
+	}
+	
+	public static Force force(float posx, float posy, float strx, float stry) {
+		
+		return new Force(arr(posx, posy),arr(strx, stry));
+	}
+
+	public static Force force(float pos[], float strx, float stry) {
+		
+		return force(pos[0],pos[1],strx,stry);
+	}
+
+	public static Force force(float[] pos,float[] force) {
+		
+		return new Force(pos, force);
+	}
+	
+	public static float[] arr(float x,float y) {
+		
+		return new float[] {x,y};
+	}
+	
+	public static float[] pol(float mod,float angle) {
+		
+		
+		return arr((float)Math.cos(Math.toRadians(angle))*mod, (float)Math.sin(Math.toRadians(angle))*mod);
 	}
 	
 }

@@ -9,7 +9,7 @@ public class GameState {
 
 	static HashMap<GameCode,String> dic = new HashMap<>();
 	static ArrayList<Label> labels = new ArrayList<>();
-	static GameCode current = GameCode.CREATE_SOLID;
+	static GameCode current = GameCode.MOVE;
 	static {
 		
 		dic.put(GameCode.IDLE, "Haz clic en ayuda para empezar");

@@ -2,8 +2,10 @@ package com.nsoft.nphysics;
 
 import com.badlogic.gdx.Input.Keys;
 import com.nsoft.nphysics.GameState.GameCode;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector2;
 
 public class Input implements InputProcessor {
 
@@ -63,9 +65,10 @@ public class Input implements InputProcessor {
 		NPhysics.scene.proccessClick(screenX, screenY);
 			return true;	
 	}
-
+	
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		
 		return true;
 	}
 
